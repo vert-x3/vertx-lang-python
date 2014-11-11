@@ -1,0 +1,426 @@
+@comment{"Generate a Python class"}
+@comment{"======================="}
+
+@code{
+	def requiresTypeCheck(methods) {
+		for (method : methods) {
+			for (param : method.params) {
+				if ([CLASS_PRIMITIVE, CLASS_BOXED_PRIMITIVE, CLASS_STRING, CLASS_JSON_ARRAY, CLASS_JSON_OBJECT, CLASS_HANDLER, CLASS_OPTIONS].contains(param.type.kind)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+}
+
+@code{
+	def getAllParamNames(methods) {
+		paramNames = [];
+		for (method : methods) {
+			for (param : method.params) {
+				if (!paramNames.contains(param.name)) {
+					paramNames.add(param.name);
+				}
+			}
+		}
+		return paramNames;
+	}
+}
+
+@code{
+	def getParamNames(method) {
+		paramNames = [];
+		for (param : method.params) {
+			paramNames.add(param.name);
+		}
+		return paramNames;
+	}
+}
+
+@code{
+	def convertName(name) {
+		reserved = ['if', 'elif', 'else', 'from', 'in', 'not', 'and', 'or', 'as', 'try', 'except', 'raise', 'return', 'lambda', 'finally', 'continue', 'for', 'while', 'yield', 'pass', 'with', 'assert', 'break', 'class', 'def', 'exec', 'del', 'import'];
+		return reserved.contains(name) ? helper.convertCamelCaseToUnderscores('_' + name) : helper.convertCamelCaseToUnderscores(name);
+	}
+}
+
+@declare{'genMethodCall'}
+@if{static}util.jvm.@{ifaceFQCN}@else{}self.j@{ifaceName}@end{}.@{method.name}(
+	@foreach{param: method.params}
+		@code{argName=convertName(param.name);}
+		@includeNamed{'convParam'}
+	@end{", "})
+@end{}
+
+@comment{"Generate the code that converts a parameter from JavaScript to Java to call a Java API method"}
+@comment{"============================================================================================="}
+
+@declare{'convParam'}
+	@code{paramName = overloaded ? argName : param.name;}
+	@if{param.type.name.startsWith('io.vertx.core.Handler<')}
+		@code{genericType = helper.getGenericType(param.type.name)}
+		@if{genericType.startsWith('io.vertx.core.AsyncResult<')}
+			Async@{helper.getNonGenericType(helper.getSimpleName(helper.getGenericType(genericType))).replace('<', '').replace('>', '')}Handler(@{paramName})
+		@else{genericType.equals('java.lang.Void')}
+			@{paramName}
+		@else{}
+			@{helper.getNonGenericType(helper.getSimpleName(genericType))}Handler(@{paramName})
+		@end{}
+	@else{param.type.name.equals('io.vertx.core.json.JsonObject')}
+		util.dict_to_json(@{paramName})
+	@else{param.type.name.equals('io.vertx.core.json.JsonArray')}
+		util.list_to_json(@{paramName})
+	@else{param.options}
+		@{helper.getSimpleName(param.type.name)}.optionsFromJson(util.dict_to_json(@{paramName})) if @{paramName} is not None else None
+	@else{param.type.kind == CLASS_OBJECT}
+		util.python_to_java(@{paramName})
+	@else{helper.isBasicType(param.type.name) || param.type.name.equals('java.lang.Void')}
+		@{convertName(paramName)}
+	@else{}
+		@{paramName}._jdel()
+	@end{}
+@end{}
+
+@declare{'resultVal'}
+result
+@end{}
+
+@declare{'arVal'}
+result.result()
+@end{}
+
+@comment{"Generate the code that converts a Java return to the corresponding JavaScript value"}
+@comment{"This is also used for converting values returned from Java API via handlers"}
+@comment{"==================================================================================="}
+
+@declare{'convReturn'}
+	@code{genericType=helper.getGenericType(returnType)}
+	@if{returnType.startsWith('java.util.List') || returnType.startsWith('java.util.Set')}
+		@if{genericType.equals('io.vertx.core.json.JsonObject')}
+			util.list_obj_to_python(@includeNamed{templ}, dict)
+		@else{genericType.equals('io.vertx.core.json.JsonArray')}
+			util.list_obj_to_python(@includeNamed{templ}, list)
+		@else{helper.isVertxGenType(helper.getGenericType(returnType))}
+			util.list_obj_to_python(@includeNamed{templ}, @{helper.getGenericType(returnType)})
+		@else{}
+			@includeNamed{templ}
+		@end{}
+	@else{returnType.equals('io.vertx.core.json.JsonObject') || returnType.equals('io.vertx.core.json.JsonArray')}
+		util.java_to_python(@includeNamed{templ})
+	@else{helper.isBasicType(returnType) || returnType.equals('java.lang.Void')}
+		@includeNamed{templ}
+	@else{method.returnType.kind == CLASS_API}
+		@{helper.getSimpleName(helper.getNonGenericType(returnType))}(@includeNamed{templ})
+	@else{}
+	@comment{'This will probably happen if the return type is generic'}
+		util.java_to_python(@includeNamed{templ})
+	@end{}
+@end{}
+
+@comment{"Generate a Python condition"}
+@comment{"==========================="}
+
+@declare{'genCondition'}
+	@code{methodParamNames = getParamNames(method)}
+	@if{paramNames.size() > methodParamNames.size()}
+		@code{missingParamNames = []}
+		@foreach{paramName: paramNames}
+			@if{!methodParamNames.contains(paramName)}
+				@code{missingParamNames.add(paramName)}
+			@end{}
+		@end{}
+		@foreach{paramName: missingParamNames}
+			@if{optionsParam != null && optionsParam.name == paramName}
+				len(@{convertName(paramName)}) == 0
+			@else{}
+				@{convertName(paramName)} is None
+			@end{}
+		@end{" and "}
+		 and 
+	@end{}
+	@foreach{param: method.params}
+		@if{param.type.kind == CLASS_PRIMITIVE || param.type.kind == CLASS_BOXED_PRIMITIVE}
+			@if{param.type.name == 'long' || param.type.name == 'java.lang.Long' ||
+				param.type.name == 'int'  || param.type.name == 'java.lang.Integer' ||
+				param.type.name == 'short' || param.type.name == 'java.lang.Short'}
+				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, int)
+			@else{param.type.name == 'float' || param.type.name == 'java.lang.Float' ||
+				param.type.name == 'double' || param.type.name == 'java.lang.Double'}
+				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, float)
+			@else{param.type.name == 'byte' || param.type.name == 'java.lang.Byte'}
+				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, byte)
+			@else{param.type.name == 'boolean' || param.type.name == 'java.lang.Boolean'}
+				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, bool)
+			@else{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
+				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, basestring)
+			@end{}
+		@else{param.type.kind == CLASS_STRING}
+			@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, basestring)
+		@else{param.type.kind == CLASS_JSON_OBJECT}
+	    	@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, dict)
+		@else{param.type.kind == CLASS_JSON_ARRAY}
+			@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, (list, tuple))
+		@else{param.type.kind == CLASS_HANDLER}
+			@{convertName(param.name)} is not None and callable(@{convertName(param.name)})
+		@else{param.type.kind == CLASS_OPTIONS}
+			len(@{convertName(param.name)}) > 0
+		@else{}
+			True
+		@end{}
+	@end{" and "}
+@end{}
+
+@comment{"Generate a Python Method"}
+@comment{"========================"}
+
+@declare{'genMethod'}
+	@code{methodList = methodsByName.get(methodName); overloaded = methodList.size() > 1; method = methodList.get(0);}
+
+	@code{requiredParams = []; optionalParams = []; optionsParam = null; paramNames = []; cnt = 0;}
+	@foreach{method: methodList}
+		@if{cnt == 0}
+			@foreach{param: method.params}
+				@if{param.type.kind == CLASS_OPTIONS}
+					@code{optionsParam = param}
+				@end{}
+				@code{requiredParams.add(param.name);}
+			@end{}
+			@code{cnt++}
+		@else{}
+			@code{newRequiredParams = []}
+			@foreach{param: method.params}
+				@if{!paramNames.contains(param.name)}@code{paramNames.add(param.name)}@end{}
+				@if{param.type.kind == CLASS_OPTIONS}
+					@code{optionsParam = param}
+				@end{}
+				@if{requiredParams.contains(param.name)}
+					@code{newRequiredParams.add(param.name)}
+				@else{!optionalParams.contains(param.name)}
+					@code{optionalParams.add(param.name)}
+				@end{}
+			@end{}
+			@code{requiredParams = newRequiredParams}
+		@end{}
+	@end{}
+
+	@code{childMethods = []}
+	@foreach{method: methodList}
+		@code{base = true; methodParamNames = getParamNames(method)}
+		@foreach{methodParamName : methodParamNames}
+			@if{!requiredParams.contains(methodParamName)}
+				@code{base = false}
+			@end{}
+		@end{}
+		@if{!base}@code{childMethods.add(method)}@end{}
+	@end{}
+
+	@code{baseMethod = null}
+	@foreach{method: methodList}
+		@code{base = true; methodParamNames = getParamNames(method)}
+		@foreach{methodParamName : methodParamNames}
+			@if{!requiredParams.contains(methodParamName)}
+				@code{base = false}
+			@end{}
+		@end{}
+		@if{base}@code{baseMethod = method}@end{}
+	@end{}
+
+	@if{baseMethod != null && static == method.staticMethod}
+		@if{static}@{ind}@@classmethod\n@end{}
+		@{ind}def @{convertName(methodName)}(self
+		@foreach{param : requiredParams}
+			@if{optionsParam == null || param != optionsParam.name}
+				, @{convertName(param)}
+			@end{}
+		@end{}
+		@foreach{param: optionalParams}
+			@if{optionsParam == null || param != optionsParam.name}
+				, @{convertName(param)}=None
+			@end{}
+		@end{}
+		@if{optionsParam != null}
+			, **@{convertName(optionsParam.name)}
+		@end{}):\n
+
+		@if{method.comment != null && helper.removeTags(method.comment).length() > 0}
+			@{helper.indentString("\"\"\"\n" + helper.removeTags(method.comment) + "\"\"\"\n", ind + "    ")}
+		@else{}
+			@{ind}    """"""\n
+		@end{}
+
+		@if{childMethods.isEmpty()}
+			@if{requiresTypeCheck([baseMethod])}
+				@{ind}    if @includeNamed{'genCondition';method=baseMethod;}:\n
+				@if{baseMethod.fluent}
+					@{ind}        @includeNamed{'genMethodCall'; method=baseMethod}\n
+				@else{}
+					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType.name; method=baseMethod}\n
+				@end{}
+				@{ind}    else:\n
+				@{ind}        raise TypeError("Invalid arguments for @{convertName(methodName)}")\n
+			@else{}
+				@if{baseMethod.fluent}
+					@{ind}    @includeNamed{'genMethodCall'; method=baseMethod}\n
+				@else{}
+					@{ind}    return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType.name; method=baseMethod}\n
+				@end{}
+			@end{}
+		@else{}
+			@code{mcnt = 0;}
+			@foreach{method: childMethods}
+				@{ind}    @if{mcnt == 0}if @code{mcnt++}@else{}elif @end{}@includeNamed{'genCondition'}:\n
+				@if{method.fluent}
+					@{ind}        @includeNamed{'genMethodCall'}\n
+				@else{}
+					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=method.returnType.name}\n
+				@end{}
+			@end{}
+			@if{requiresTypeCheck([baseMethod])}
+				@{ind}    elif @includeNamed{'genCondition';method=baseMethod;}:\n
+				@if{baseMethod.fluent}
+					@{ind}        @includeNamed{'genMethodCall'; method=baseMethod}\n
+				@else{}
+					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType.name; method=baseMethod}\n
+				@end{}
+				@{ind}    else:\n
+				@{ind}        raise TypeError("Invalid arguments for @{convertName(methodName)}")\n
+			@else{}
+				@{ind}    else:\n
+				@if{baseMethod.fluent}
+					@{ind}        @includeNamed{'genMethodCall'; method=baseMethod}\n
+				@else{}
+					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType.name; method=baseMethod}\n
+				@end{}
+			@end{}
+			@if{baseMethod.fluent}
+				        return @if{static}@{ifaceSimpleName}@else{}self@end{}\n
+			@end{}
+		@end{}
+		\n
+	@end{}
+@end{}
+
+@comment{"Generate a Vert.x handler"}
+@comment{"========================="}
+
+@code{handlers = []}
+
+@declare{'genHandlers'}
+	@code{methodList = methodsByName.get(methodName); overloaded = methodList.size() > 1; method = methodList.get(0);}
+	@foreach{method: methodList}
+		@foreach{param: method.params}
+			@if{param.type.name.startsWith('io.vertx.core.Handler<') && !handlers.contains(param.type.name)}
+				@code{genericType = helper.getGenericType(param.type.name)}
+				@if{genericType.startsWith('io.vertx.core.AsyncResult<')}
+					@code{className = 'Async' + helper.getNonGenericType(helper.getSimpleName(helper.getGenericType(genericType))).replace('<', '').replace('>', '') + 'Handler'}
+				@else{}
+					@code{className = helper.getNonGenericType(helper.getSimpleName(genericType)) + 'Handler'}
+				@end{}
+				class @{className}(object):\n
+				    class Java:\n
+				        implements = 'io.vertx.core.Handler'\n
+				    def __init__(self, handler):\n
+				        self.handler = handler\n
+				    def handle(self, result):\n
+				@if{genericType.startsWith('io.vertx.core.AsyncResult<')}
+					        if result.succeeded():\n
+					@if{helper.getGenericType(genericType).startsWith('java.lang.Void')}
+						            self.handler(None, None)\n
+					@else{}
+						            self.handler(@includeNamed{'convReturn'; templ='arVal'; returnType=helper.getGenericType(genericType)}, None)\n
+					@end{}
+					        else:\n
+					            self.handler(None, result.cause())\n
+				@else{}
+					        self.handler(@includeNamed{'convReturn'; templ='resultVal'; returnType=genericType})\n
+				@end{}
+				\n
+				@code{handlers.add(param.type.name)}
+			@end{}
+		@end{}
+	@end{}
+@end{}
+
+@comment{"This is where the generation starts"}
+@comment{"==================================="}
+
+# Copyright 2014 the original author or authors.\n
+#\n
+# Licensed under the Apache License, Version 2.0 (the "License");\n
+# you may not use this file except in compliance with the License.\n
+# You may obtain a copy of the License at\n
+#\n
+#      http://www.apache.org/licenses/LICENSE-2.0\n
+#\n
+# Unless required by applicable law or agreed to in writing, software\n
+# distributed under the License is distributed on an "AS IS" BASIS,\n
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+# See the License for the specific language governing permissions and\n
+# limitations under the License.\n
+
+@comment{"Import utility functions into all modules"}
+
+from vertx_python import util\n
+\n
+
+@comment{"Initalize the Vert.x client if necessary"}
+
+util.vertx_init()\n
+\n
+
+@comment{"Generate the imports"}
+
+@foreach{referencedType : referencedTypes}
+	@code{refedType = helper.getNonGenericType(referencedType.name)}
+	@code{refedPackage = refedType.substring(refedType.lastIndexOf('.', refedType.lastIndexOf('.') - 1) + 1, refedType.lastIndexOf('.'))}
+	from @{referencedType.moduleName}_python.@{refedPackage}.@{convertName(referencedType.simpleName)} import @{referencedType.simpleName}\n
+@end{}
+\n
+
+@comment{"The top level vars for the module"}
+
+@foreach{optionType: referencedOptionsTypes}
+	@{helper.getSimpleName(optionType)} = util.jvm.@{optionType}\n
+@end{}
+\n
+@code{ifaceName = helper.decapitaliseFirstLetter(ifaceSimpleName)}
+
+@comment{"The class"}
+class @{ifaceSimpleName}(@foreach{superType: superTypes}@{helper.getSimpleName(helper.getNonGenericType(superType))}@end{", "}@if{!superTypes.isEmpty()}, object@else{}object@end{}):\n
+
+@comment{"The main comment"}
+@if{ifaceComment != null}
+	@{helper.indentString("\"\"\"\n" + helper.removeTags(ifaceComment) + "\n\"\"\"\n", "    ")}
+@end{}
+
+@comment{"The constructor"}
+    def __init__(self, jval):\n
+        self.j@{ifaceName} = jval\n
+        super(@{ifaceSimpleName}, self).__init__(@if{superTypes.size() > 0}jval@end{})\n
+\n
+
+@comment{"Now iterate through each unique method"}
+
+@foreach{methodName:methodsByName.keySet()}
+	@comment{"Call out to actually generate the method, considering only non-static ones"}
+	@includeNamed{'genMethod';static=false;ind="    "}
+@end{}
+
+@comment{"Each object has a _jdel property which gives access to the underlying Java object"}
+    @@property\n
+    def _jdel(self):\n
+        return self.j@{ifaceName}\n\n
+
+@comment{"Iterate through the methods again, this time only considering the static ones"}
+
+@foreach{methodName:methodsByName.keySet()}
+	@comment{"Call out to generate the static method"}
+	@includeNamed{'genMethod';static=true;ind="    "}
+@end{}
+
+@comment{"Iterate through methods again and create result handler classes"}
+
+@foreach{methodName:methodsByName.keySet()}
+	@includeNamed{'genHandlers'}
+@end{}

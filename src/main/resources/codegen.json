@@ -1,0 +1,20 @@
+{
+  "name": "Python",
+  "generators": [
+    {
+      "kind": "class",
+      "fileName": "'resources/' + type.raw.moduleName + '_python/' + fqn.substring(fqn.lastIndexOf('.', fqn.lastIndexOf('.') - 1) + 1, fqn.lastIndexOf('.')) + '/' + helper.convertCamelCaseToUnderscores(type.raw.simpleName) + '.py'",
+      "templateFileName": "vertx_python/template/python.templ"
+    },
+    {
+      "kind": "class",
+      "fileName": "'resources/' + type.raw.moduleName + '_python/__init__.py'",
+      "templateFileName": "vertx_python/template/init.templ"
+    },
+    {
+      "kind": "class",
+      "fileName": "'resources/' + type.raw.moduleName + '_python/' + fqn.substring(fqn.lastIndexOf('.', fqn.lastIndexOf('.') - 1) + 1, fqn.lastIndexOf('.')) + '/__init__.py'",
+      "templateFileName": "vertx_python/template/init.templ"
+    }
+  ]
+}
