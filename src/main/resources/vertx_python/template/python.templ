@@ -67,13 +67,13 @@
 			@{param.type.args[0].raw.simpleName}Handler(@{convertName(paramName)})
 		@end{}
 	@else{param.type.kind == CLASS_JSON_OBJECT}
-		util.dict_to_json(@{paramName})
+		util.dict_to_json(@{convertName(paramName)})
 	@else{param.type.kind == CLASS_JSON_ARRAY}
-		util.list_to_json(@{paramName})
+		util.list_to_json(@{convertName(paramName)})
 	@else{param.dataObject}
-		@{param.type.simpleName}.optionsFromJson(util.dict_to_json(@{paramName})) if @{paramName} is not None else None
+		@{param.type.simpleName}.optionsFromJson(util.dict_to_json(@{convertName(paramName)})) if @{convertName(paramName)} is not None else None
 	@else{param.type.kind == CLASS_OBJECT}
-		util.python_to_java(@{paramName})
+		util.python_to_java(@{convertName(paramName)})
 	@else{param.type.kind.basic || param.type.name.equals("java.lang.Void")}
 		@{convertName(paramName)}
 	@else{}
@@ -335,6 +335,7 @@ result.result()
 							self.handler(None)\n
 					@else{}
 					        self.handler(@includeNamed{'convReturn'; templ='resultVal'; returnType=param.type.args[0]})\n
+					@end{}
 				@end{}
 				\n
 				@code{handlers.add(param.type.name)}
