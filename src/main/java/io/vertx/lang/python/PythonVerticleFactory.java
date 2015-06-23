@@ -1,6 +1,7 @@
 package io.vertx.lang.python;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
@@ -37,6 +38,7 @@ public class PythonVerticleFactory implements VerticleFactory {
 
   @Override
   public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
+    init();
     return new PythonVerticle(verticleName);
   }
 
@@ -55,7 +57,6 @@ public class PythonVerticleFactory implements VerticleFactory {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-      init();
       ProcessBuilder pb = new ProcessBuilder("python", verticleName, String.valueOf(port), String.valueOf(client));
       pb.redirectOutput(Redirect.INHERIT);
       pb.redirectError(Redirect.INHERIT);
