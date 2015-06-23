@@ -60,11 +60,11 @@
 	@code{paramName = overloaded ? argName : param.name;}
 	@if{param.type.kind == CLASS_HANDLER}
 		@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
-			Async@{param.type.args[0].args[0].raw.simpleName}Handler(@{paramName})
-		@else{param.type.args[0].name == "java.lang.Void"}
-			@{paramName}
+			Async@{param.type.args[0].args[0].raw.simpleName}Handler(@{convertName(paramName)})
+		@else{param.type.args[0].name.equals("java.lang.Void")}
+			@{convertName(paramName)}
 		@else{}
-			@{param.type.args[0].raw.simpleName}Handler(@{paramName})
+			@{param.type.args[0].raw.simpleName}Handler(@{convertName(paramName)})
 		@end{}
 	@else{param.type.kind == CLASS_JSON_OBJECT}
 		util.dict_to_json(@{paramName})
@@ -74,10 +74,10 @@
 		@{param.type.simpleName}.optionsFromJson(util.dict_to_json(@{paramName})) if @{paramName} is not None else None
 	@else{param.type.kind == CLASS_OBJECT}
 		util.python_to_java(@{paramName})
-	@else{param.type.kind.basic || param.type.name == "java.lang.Void"}
+	@else{param.type.kind.basic || param.type.name.equals("java.lang.Void")}
 		@{convertName(paramName)}
 	@else{}
-		@{paramName}._jdel()
+		@{convertName(paramName)}._jdel()
 	@end{}
 @end{}
 
@@ -331,6 +331,9 @@ result.result()
 					        else:\n
 					            self.handler(None, result.cause())\n
 				@else{}
+					@if{param.type.args[0].name.startsWith('java.lang.Void')}
+							self.handler(None)\n
+					@else{}
 					        self.handler(@includeNamed{'convReturn'; templ='resultVal'; returnType=param.type.args[0]})\n
 				@end{}
 				\n
