@@ -142,7 +142,7 @@
         <artifactId>maven-processor-plugin</artifactId>
         <version>2.2.4</version>
         <executions>
-          <!-- Run the annotation processor on vertx-core and generate the js API -->
+          <!-- Run the annotation processor on vertx-core and generate the python API -->
           <execution>
             <id>generate-vertx-core</id>
             <goals>
@@ -178,7 +178,7 @@
                 <processor>io.vertx.docgen.DocGenProcessor</processor>
               </processors>
               <optionMap>
-                <docgen.output>${asciidoc.dir}/js</docgen.output>
+                <docgen.output>${asciidoc.dir}/python</docgen.output>
               </optionMap>
               <sourceDirectory>${project.build.directory}/sources/vertx-core</sourceDirectory>
             </configuration>
@@ -199,13 +199,13 @@
                 <processor>io.vertx.docgen.DocGenProcessor</processor>
               </processors>
               <optionMap>
-                <docgen.output>${asciidoc.dir}/js</docgen.output>
+                <docgen.output>${asciidoc.dir}/python</docgen.output>
               </optionMap>
               <sourceDirectory>src/main/docoverride</sourceDirectory>
             </configuration>
           </execution>
 
-          <!-- Run the annotation processor on codegen and generate the js codegen -->
+          <!-- Run the annotation processor on codegen and generate the python codegen -->
           <execution>
             <id>generate-codegen</id>
             <goals>
