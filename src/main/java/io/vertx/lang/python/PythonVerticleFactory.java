@@ -39,6 +39,7 @@ public class PythonVerticleFactory implements VerticleFactory {
   @Override
   public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
     init();
+    verticleName = VerticleFactory.removePrefix(verticleName);
     return new PythonVerticle(verticleName);
   }
 

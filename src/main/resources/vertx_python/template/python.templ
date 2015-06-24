@@ -46,7 +46,7 @@
 }
 
 @declare{'genMethodCall'}
-@if{static}util.jvm.@{ifaceFQCN}@else{}self.j@{ifaceName}@end{}.@{method.name}(
+@if{static}util.jvm.@{ifacePackageName}.@{ifaceSimpleName}@else{}self.j@{ifaceName}@end{}.@{method.name}(
 	@foreach{param: method.params}
 		@code{argName=convertName(param.name);}
 		@includeNamed{'convParam'}
@@ -352,7 +352,7 @@ result.result()
 					            self.handler(None, result.cause())\n
 				@else{}
 					@if{param.type.args[0].name.startsWith('java.lang.Void')}
-								self.handler(None)\n
+					                self.handler(None)\n
 					@else{}
 					        self.handler(@includeNamed{'convReturn'; templ='resultVal'; returnType=param.type.args[0]})\n
 					@end{}
