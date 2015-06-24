@@ -58,7 +58,6 @@
 
 @declare{'convParam'}
 	@code{paramName = overloaded ? argName : param.name;}
-	@code{System.out.println("IN here for " + paramName)}
 	@if{param.type.kind == CLASS_HANDLER}
 		@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
 			@if{param.type.args[0].args[0].raw != null}
@@ -74,7 +73,6 @@
 			@else{}
 				@{param.type.args[0].name}Handler(@{convertName(paramName)})
 			@end{}
-			@code{System.out.println("ELSE is done")}
 		@end{}
 	@else{param.type.kind == CLASS_JSON_OBJECT}
 		util.dict_to_json(@{convertName(paramName)})
@@ -89,7 +87,6 @@
 	@else{}
 		@{convertName(paramName)}._jdel()
 	@end{}
-	@code{System.out.println("DONE here for " + paramName)}
 @end{}
 
 @declare{'resultVal'}
