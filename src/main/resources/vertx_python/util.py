@@ -19,7 +19,7 @@ def vertx_init():
             raise RuntimeError("Failed to connect to Vert.x")
         try:
             from py4j.java_gateway import JavaGateway, GatewayClient
-            java_gateway = JavaGateway(GatewayClient(port=int(port)))
+            java_gateway = JavaGateway(GatewayClient(port=int(port)), start_callback_server=True)
             jvm = java_gateway.jvm
             jvertx = java_gateway.entry_point.getVertx()
         except ImportError:
