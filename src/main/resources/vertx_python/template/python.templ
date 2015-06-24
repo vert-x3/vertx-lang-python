@@ -323,7 +323,7 @@ result.result()
 				    def handle(self, result):\n
 				@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
 					        if result.succeeded():\n
-					@if{param.type.args[0].name.startsWith('java.lang.Void')}
+					@if{param.type.args[0].args[0].name.startsWith('java.lang.Void')}
 						            self.handler(None, None)\n
 					@else{}
 						            self.handler(@includeNamed{'convReturn'; templ='arVal'; returnType=param.type.args[0].args[0]}, None)\n
