@@ -64,7 +64,7 @@ def java_to_python(obj):
     """Converts an arbitrary Java object to Python"""
     if obj is None:
         return None
-    elif is_instance_of(obj, jvm.io.vertx.core.json.JsonObject) or is_instance_of(obj, jvm.io.vertx.core.json.JsonArray):
+    elif is_instance_of(java_gateway, obj, jvm.io.vertx.core.json.JsonObject) or is_instance_of(java_gateway, obj, jvm.io.vertx.core.json.JsonArray):
         return json_to_python(obj)
     else:
         return obj
