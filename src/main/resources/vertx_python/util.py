@@ -11,7 +11,7 @@ def vertx_init():
     global jvm
     global jvertx
 
-    if not hasattr(__builtins__, 'jvm'):
+    if not hasattr(__builtins__, 'jvm') and not all([jvm, jvertx, java_gateway]):
         import sys
         try:
             port = sys.argv[1]
@@ -19,7 +19,9 @@ def vertx_init():
             raise RuntimeError("Failed to connect to Vert.x")
         try:
             from py4j.java_gateway import JavaGateway, GatewayClient
-            java_gateway = JavaGateway(GatewayClient(port=int(port)), start_callback_server=True)
+            java_gateway = JavaGateway(GatewayClient(port=int(port)), 
+                                       start_callback_server=True,
+                                       python_proxy_port=24332)
             jvm = java_gateway.jvm
             jvertx = java_gateway.entry_point.getVertx()
         except ImportError:
