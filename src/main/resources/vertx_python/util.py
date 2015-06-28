@@ -21,7 +21,7 @@ def vertx_init():
             from py4j.java_gateway import JavaGateway, GatewayClient
             java_gateway = JavaGateway(GatewayClient(port=int(port)), 
                                        start_callback_server=True,
-                                       python_proxy_port=24332)
+                                       python_proxy_port=int(sys.argv[2]))
             jvm = java_gateway.jvm
             jvertx = java_gateway.entry_point.getVertx()
         except ImportError:
