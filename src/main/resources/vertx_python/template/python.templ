@@ -342,7 +342,7 @@ result.result()
 				@end{}
 				class @{className}(object):\n
 				    class Java:\n
-				        implements = 'io.vertx.core.Handler'\n
+				        implements = ['io.vertx.core.Handler']\n
 				    def __init__(self, handler):\n
 				        self.handler = handler\n
 				    def handle(self, result):\n
