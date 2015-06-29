@@ -118,6 +118,9 @@ public class PythonVerticleFactory implements VerticleFactory {
           gateway.start();
           connected = true;
         } catch (Exception e) {
+          // If port seemed to be taken, increment port/client_port together.
+          // This is kind of hacky, since we really have no confirmation that
+          // client_port is unused, even if port works.
           port++;
           client_port++;
         }
