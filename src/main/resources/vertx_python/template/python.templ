@@ -79,7 +79,7 @@
 	@else{param.type.kind == CLASS_JSON_ARRAY}
 		util.list_to_json(@{convertName(paramName)})
 	@else{param.dataObject}
-		@{param.type.simpleName}.optionsFromJson(util.dict_to_json(@{convertName(paramName)})) if @{convertName(paramName)} is not None else None
+		@{param.type.simpleName}(util.dict_to_json(@{convertName(paramName)})) if @{convertName(paramName)} is not None else None
 	@else{param.type.kind == CLASS_OBJECT}
 		util.python_to_java(@{convertName(paramName)})
 	@else{param.type.kind.basic || param.type.name.equals("java.lang.Void")}
@@ -179,7 +179,8 @@ result.result()
 		@else{param.type.kind == CLASS_HANDLER}
 			@{convertName(param.name)} is not None and callable(@{convertName(param.name)})
 		@else{param.type.kind == CLASS_DATA_OBJECT}
-			len(@{convertName(param.name)}) > 0
+			True
+			@comment{"len(@{convertName(param.name)}) > 0"}
 		@else{}
 			@comment{"This could possibly be smarter and do an isinstance check sometimes (not always, though)"}
 			@{convertName(param.name)} is not None
@@ -346,22 +347,28 @@ result.result()
 				    def __init__(self, handler):\n
 				        self.handler = handler\n
 				    def handle(self, result):\n
-				@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
-					        if result.succeeded():\n
-					@if{param.type.args[0].args[0].name.startsWith('java.lang.Void')}
-						            self.handler(None, None)\n
+				        try:\n
+					@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
+				            if result.succeeded():\n
+						@if{param.type.args[0].args[0].name.startsWith('java.lang.Void')}
+				                self.handler(None, None)\n
+						@else{}
+				                self.handler(@includeNamed{'convReturn'; templ='arVal'; returnType=param.type.args[0].args[0]}, None)\n
+						@end{}
+				            else:\n
+				                self.handler(None, result.cause())\n
 					@else{}
-						            self.handler(@includeNamed{'convReturn'; templ='arVal'; returnType=param.type.args[0].args[0]}, None)\n
+						@if{param.type.args[0].name.startsWith('java.lang.Void')}
+				            self.handler(None)\n
+						@else{}
+				            self.handler(@includeNamed{'convReturn'; templ='resultVal'; returnType=param.type.args[0]})\n
+						@end{}
 					@end{}
-					        else:\n
-					            self.handler(None, result.cause())\n
-				@else{}
-					@if{param.type.args[0].name.startsWith('java.lang.Void')}
-					                self.handler(None)\n
-					@else{}
-					        self.handler(@includeNamed{'convReturn'; templ='resultVal'; returnType=param.type.args[0]})\n
-					@end{}
-				@end{}
+				        except Exception:\n
+				            import traceback\n
+				            traceback.print_exc()\n
+				            raise\n
+				
 				\n
 				@code{handlers.add(param.type.name)}
 			@end{}

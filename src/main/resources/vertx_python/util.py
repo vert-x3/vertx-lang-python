@@ -1,5 +1,6 @@
 import json
 from py4j.java_gateway import is_instance_of
+from py4j.protocol import Py4JNetworkError
 
 java_gateway = None
 jvm = None
@@ -19,9 +20,11 @@ def vertx_init():
             raise RuntimeError("Failed to connect to Vert.x")
         try:
             from py4j.java_gateway import JavaGateway, GatewayClient
+            proxy_port = int(sys.argv[2])
             java_gateway = JavaGateway(GatewayClient(port=int(port)), 
                                        start_callback_server=True,
-                                       python_proxy_port=int(sys.argv[2]))
+                                       eager_load=True,
+                                       python_proxy_port=proxy_port)
             jvm = java_gateway.jvm
             jvertx = java_gateway.entry_point.getVertx()
         except ImportError:
