@@ -65,8 +65,6 @@
 			@else{}
 				Async@{param.type.args[0].args[0].name}Handler(@{convertName(paramName)})
 			@end{}
-		@else{param.type.args[0].name.equals("java.lang.Void")}
-			@{convertName(paramName)}
 		@else{}
 			@if{param.type.args[0].raw != null}
 				@{param.type.args[0].raw.simpleName}Handler(@{convertName(paramName)})
@@ -397,7 +395,7 @@ result.result()
 
 from __future__ import unicode_literals, print_function, absolute_import\n
 from vertx_python import util\n
-from vertx_python.compat import *\n
+from vertx_python.compat import long, basestring\n
 \n
 
 @comment{"Initalize the Vert.x client if necessary"}
@@ -405,20 +403,26 @@ from vertx_python.compat import *\n
 util.vertx_init()\n
 \n
 
-@comment{"Generate the imports"}
 
 @code{imported = []}
 @foreach{importedType : importedTypes}
 	@code{impType = importedType.raw.name}
-	@if{impType.contains("vertx")}
+	@code{impPackage = impType.substring(impType.lastIndexOf('.', impType.lastIndexOf('.') - 1) + 1, impType.lastIndexOf('.'))}
+	@if{impType.substring(0, impType.lastIndexOf('.')).equals(ifacePackageName)}
+		@if{!referencedDataObjectTypes.contains(importedType) && !importedType.raw.simpleName.equals(ifaceSimpleName)}
+			@comment{"from @{importedType.moduleName}_python.@{impPackage}.@{convertName(importedType.simpleName)} import @{importedType.simpleName}\n"}
+			@comment{"@code{imported.add(importedType.simpleName)}"}
+		@end{}
 	@end{}
 @end{}
 
 @foreach{referencedType : referencedTypes}
-	@code{refedType = referencedType.raw.name}
-	@code{refedPackage = refedType.substring(refedType.lastIndexOf('.', refedType.lastIndexOf('.') - 1) + 1, refedType.lastIndexOf('.'))}
-	from @{referencedType.moduleName}_python.@{refedPackage}.@{convertName(referencedType.simpleName)} import @{referencedType.simpleName}\n
-	@code{imported.add(referencedType.simpleName)}
+	@if{!imported.contains(referencedType.simpleName)}
+		@code{refedType = referencedType.raw.name}
+		@code{refedPackage = refedType.substring(refedType.lastIndexOf('.', refedType.lastIndexOf('.') - 1) + 1, refedType.lastIndexOf('.'))}
+		from @{referencedType.moduleName}_python.@{refedPackage}.@{convertName(referencedType.simpleName)} import @{referencedType.simpleName}\n
+		@code{imported.add(referencedType.simpleName)}
+	@end{}
 @end{}
 \n
 
