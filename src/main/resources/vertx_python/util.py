@@ -30,6 +30,9 @@ def vertx_init():
         except ImportError:
             raise RuntimeError("Failed to connect to Vert.x. Py4J must be on your PYTHONPATH")
 
+def convert_char(ch):
+    return chr(ch) if isinstance(ch, int) else ch
+
 def json_to_python(obj):
     """Converts a Java JSON object to Python dict or list"""
     return json.loads(obj.encode()) if obj is not None else None

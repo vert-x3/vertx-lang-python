@@ -40,7 +40,7 @@
 
 @code{
 	def convertName(name) {
-		reserved = ['if', 'elif', 'else', 'from', 'in', 'not', 'and', 'or', 'as', 'try', 'except', 'raise', 'return', 'lambda', 'finally', 'continue', 'for', 'while', 'yield', 'pass', 'with', 'assert', 'break', 'class', 'def', 'exec', 'del', 'import'];
+		reserved = ['if', 'elif', 'else', 'from', 'in', 'int', 'bool', 'long', 'bytes', 'str', 'unicode', 'not', 'and', 'or', 'as', 'try', 'except', 'raise', 'return', 'lambda', 'finally', 'continue', 'for', 'while', 'yield', 'pass', 'with', 'assert', 'break', 'class', 'def', 'exec', 'del', 'import'];
 		return reserved.contains(name) ? helper.convertCamelCaseToUnderscores('_' + name) : helper.convertCamelCaseToUnderscores(name);
 	}
 }
@@ -78,8 +78,11 @@
 		util.list_to_json(@{convertName(paramName)})
 	@else{param.dataObject}
 		@{param.type.simpleName}(util.dict_to_json(@{convertName(paramName)})) if @{convertName(paramName)} is not None else None
+	@else{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
+		util.convert_char(@{convertName(paramName)})
 	@else{param.type.kind == CLASS_OBJECT}
 		util.python_to_java(@{convertName(paramName)})
+	@else{param.type.kind == CLASS_OBJECT}
 	@else{param.type.kind.basic || param.type.name.equals("java.lang.Void")}
 		@{convertName(paramName)}
 	@else{}
@@ -166,7 +169,7 @@ result.result()
 			@else{param.type.name == 'boolean' || param.type.name == 'java.lang.Boolean'}
 				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, bool)
 			@else{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
-				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, basestring)
+				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, (basestring, int))
 			@end{}
 		@else{param.type.kind == CLASS_STRING}
 			@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, basestring)
@@ -265,6 +268,18 @@ result.result()
 		@end{}
 
 		@if{childMethods.isEmpty()}
+			@comment{"Import the Python return type inside of the method if its not "}
+			@comment{"already imported. Needed to avoid circular imports."}
+			@if{baseMethod.returnType.kind == CLASS_API && 
+               !imported.contains(baseMethod.returnType.raw.simpleName) && 
+               baseMethod.returnType.raw.simpleName != ifaceSimpleName}
+				@code{retType = baseMethod.returnType}
+				@code{refedType = retType.raw.name}
+				@code{refedPackage = refedType.substring(refedType.lastIndexOf('.', refedType.lastIndexOf('.') - 1) + 1, 
+                                                         refedType.lastIndexOf('.'))}
+				@{ind}from @{retType.moduleName}_python.@{refedPackage}.@{convertName(retType.simpleName)} import @{retType.simpleName}\n
+				@code{imported.add(retType.simpleName)}
+			@end{}
 			@if{requiresTypeCheck([baseMethod])}
 				@{ind}    if @includeNamed{'genCondition';method=baseMethod;}:\n
 				@if{baseMethod.fluent}
@@ -405,17 +420,6 @@ util.vertx_init()\n
 
 
 @code{imported = []}
-@foreach{importedType : importedTypes}
-	@code{impType = importedType.raw.name}
-	@code{impPackage = impType.substring(impType.lastIndexOf('.', impType.lastIndexOf('.') - 1) + 1, impType.lastIndexOf('.'))}
-	@if{impType.substring(0, impType.lastIndexOf('.')).equals(ifacePackageName)}
-		@if{!referencedDataObjectTypes.contains(importedType) && !importedType.raw.simpleName.equals(ifaceSimpleName)}
-			@comment{"from @{importedType.moduleName}_python.@{impPackage}.@{convertName(importedType.simpleName)} import @{importedType.simpleName}\n"}
-			@comment{"@code{imported.add(importedType.simpleName)}"}
-		@end{}
-	@end{}
-@end{}
-
 @foreach{referencedType : referencedTypes}
 	@if{!imported.contains(referencedType.simpleName)}
 		@code{refedType = referencedType.raw.name}
