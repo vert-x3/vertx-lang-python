@@ -58,7 +58,7 @@ public class PythonVerticleFactory implements VerticleFactory {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-      ProcessBuilder pb = new ProcessBuilder("python", verticleName, String.valueOf(port), String.valueOf(client_port));
+      ProcessBuilder pb = new ProcessBuilder("python", "-u", verticleName, String.valueOf(port), String.valueOf(client_port));
       pb.redirectOutput(Redirect.INHERIT);
       pb.redirectError(Redirect.INHERIT);
       process = pb.start();

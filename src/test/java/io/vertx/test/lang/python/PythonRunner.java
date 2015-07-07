@@ -62,7 +62,7 @@ public class PythonRunner {
 
   public void run(String scriptName, String testName, 
                   boolean provideRequire, boolean provideConsole) throws Exception {
-    ProcessBuilder pb = new ProcessBuilder("python", scriptName, String.valueOf(port), String.valueOf(client_port), testName);
+    ProcessBuilder pb = new ProcessBuilder("python", "-u", scriptName, String.valueOf(port), String.valueOf(client_port), testName);
     pb.redirectOutput(Redirect.INHERIT);
     pb.redirectError(Redirect.INHERIT);
     Process process = pb.start();

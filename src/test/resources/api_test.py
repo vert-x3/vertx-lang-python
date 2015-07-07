@@ -92,7 +92,7 @@ def testMethodWithHandlerAsyncResultBasicTypes():
         dct['count'] += 1
     def long_handler(l, err):
         Assert.assertEquals(type(l), long)
-        Assert.assertEquals(1265615234l, l, 0)
+        Assert.assertEquals(1265615234, l, 0)
         Assert.assertNull(err)
         dct['count'] += 1
     def float_handler(f, err):

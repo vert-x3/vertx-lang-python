@@ -453,7 +453,9 @@ class @{ifaceSimpleName}(@foreach{superType: superTypes}@{superType.raw.simpleNa
 @comment{"The constructor"}
     def __init__(self, jval):\n
         self.j@{ifaceName} = jval\n
-        super(@{ifaceSimpleName}, self).__init__(@if{superTypes.size() > 0}jval@end{})\n
+		@foreach{superType: superTypes}
+	        @{superType.raw.simpleName}.__init__(self, jval)\n
+		@end{}
 \n
 
 @comment{"Now iterate through each unique method"}
