@@ -80,9 +80,34 @@
 		@{param.type.simpleName}(util.dict_to_json(@{convertName(paramName)})) if @{convertName(paramName)} is not None else None
 	@else{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
 		util.convert_char(@{convertName(paramName)})
+	@else{param.type.name == 'long' || param.type.name == 'java.lang.Long'}
+		util.convert_long_to_java(@{convertName(paramName)})
+	@else{param.type.name == 'byte' || param.type.name == 'java.lang.Byte'}
+		util.convert_byte_to_java(@{convertName(paramName)})
+	@else{param.type.name == 'short' || param.type.name == 'java.lang.Short'}
+		util.convert_short_to_java(@{convertName(paramName)})
+	@else{param.type.name == 'float' || param.type.name == 'java.lang.Float'}
+		util.convert_float_to_java(@{convertName(paramName)})
+	@else{param.type.name == 'double' || param.type.name == 'java.lang.Double'}
+		util.convert_double_to_java(@{convertName(paramName)})
+	@else{param.type.kind == CLASS_LIST}
+		@if{param.type.args[0].name == 'char' || param.type.args[0].name == 'java.lang.Character'}
+			util.convert_char(@{convertName(paramName)})
+		@else{param.type.args[0].name == 'long' || param.type.args[0].name == 'java.lang.Long'}
+			util.convert_long_list_to_java(@{convertName(paramName)})
+		@else{param.type.args[0].name == 'byte' || param.type.args[0].name == 'java.lang.Byte'}
+			util.convert_byte_list_to_java(@{convertName(paramName)})
+		@else{param.type.args[0].name == 'short' || param.type.args[0].name == 'java.lang.Short'}
+			util.convert_short_list_to_java(@{convertName(paramName)})
+		@else{param.type.args[0].name == 'float' || param.type.args[0].name == 'java.lang.Float'}
+			util.convert_float_list_to_java(@{convertName(paramName)})
+		@else{param.type.args[0].name == 'double' || param.type.args[0].name == 'java.lang.Double'}
+			util.convert_double_list_to_java(@{convertName(paramName)})
+		@else{}
+			util.python_to_java(@{convertName(paramName)})
+		@end{}
 	@else{param.type.kind == CLASS_OBJECT}
 		util.python_to_java(@{convertName(paramName)})
-	@else{param.type.kind == CLASS_OBJECT}
 	@else{param.type.kind.basic || param.type.name.equals("java.lang.Void")}
 		@{convertName(paramName)}
 	@else{}
@@ -277,7 +302,7 @@ result.result()
 				@code{refedType = retType.raw.name}
 				@code{refedPackage = refedType.substring(refedType.lastIndexOf('.', refedType.lastIndexOf('.') - 1) + 1, 
                                                          refedType.lastIndexOf('.'))}
-				@{ind}from @{retType.moduleName}_python.@{refedPackage}.@{convertName(retType.simpleName)} import @{retType.simpleName}\n
+				@{ind}    from @{retType.moduleName}_python.@{refedPackage}.@{convertName(retType.simpleName)} import @{retType.simpleName}\n
 				@code{imported.add(retType.simpleName)}
 			@end{}
 			@if{requiresTypeCheck([baseMethod])}

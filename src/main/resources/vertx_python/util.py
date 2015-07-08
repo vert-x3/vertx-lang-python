@@ -1,43 +1,17 @@
 import json
-import socket
-from threading import Thread
-from py4j.java_gateway import (is_instance_of, CallbackServer, logger, 
-                               Py4JNetworkError, JavaGateway)
+from contextlib import contextmanager
 
 java_gateway = None
 jvm = None
 jvertx = None
 
-class DaemonCallbackServer(CallbackServer):
-    ''' Start listening thread as a daemon to prevent hangs. '''
-    def start(self):
-        """Starts the CallbackServer. This method should be called by the
-        client instead of run()."""
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,
-                1)
-        try:
-            self.server_socket.bind((self.address, self.port))
-        except Exception:
-            msg = 'An error occurred while trying to start the callback server'
-            logger.exception(msg)
-            raise Py4JNetworkError(msg)
-
-        # Maybe thread needs to be cleanup up?
-        self.thread = Thread(target=self.run)
-        self.thread.daemon = True
-        self.thread.start()
-
-class DaemonJavaGateway(JavaGateway):
-    def _start_callback_server(self, python_proxy_port):
-        self._callback_server = DaemonCallbackServer(self.gateway_property.pool,
-                self._gateway_client, python_proxy_port)
-        try:
-            self._callback_server.start()
-        except Py4JNetworkError:
-            # Clean up ourselves before raising the exception.
-            self.shutdown()
-            raise
+@contextmanager
+def handle_java_error():
+    try:
+        yield
+    except Exception:
+        java_gateway.shutdown()
+        raise
 
 def vertx_init():
     """Initializes the Vert.x connection."""
@@ -52,9 +26,9 @@ def vertx_init():
         except IndexError:
             raise RuntimeError("Failed to connect to Vert.x")
         try:
-            from py4j.java_gateway import GatewayClient
+            from py4j.java_gateway import JavaGateway, GatewayClient
             proxy_port = int(sys.argv[2])
-            java_gateway = DaemonJavaGateway(GatewayClient(port=int(port)), 
+            java_gateway = JavaGateway(GatewayClient(port=int(port)), 
                                              start_callback_server=True,
                                              eager_load=True,
                                              python_proxy_port=proxy_port)
@@ -65,6 +39,36 @@ def vertx_init():
 
 def convert_char(ch):
     return chr(ch) if isinstance(ch, int) else ch
+
+def convert_short_to_java(x):
+    return jvm.java.lang.Short(x)
+
+def convert_long_to_java(x):
+    return jvm.java.lang.Long(x)
+
+def convert_byte_to_java(x):
+    return jvm.java.lang.Byte(x)
+
+def convert_double_to_java(x):
+    return jvm.java.lang.Double(x)
+
+def convert_float_to_java(x):
+    return jvm.java.lang.Float(x)
+
+def convert_short_list_to_java(lst):
+    return list_to_json([convert_short_to_java(i) for i in lst])
+
+def convert_long_list_to_java(lst):
+    return list_to_json([convert_long_to_java(i) for i in lst])
+
+def convert_byte_list_to_java(lst):
+    return list_to_json([convert_byte_to_java(i) for i in lst])
+
+def convert_double_list_to_java(lst):
+    return list_to_json([convert_double_to_java(i) for i in lst])
+
+def convert_float_list_to_java(lst):
+    return list_to_json([convert_float_to_java(i) for i in lst])
 
 def json_to_python(obj):
     """Converts a Java JSON object to Python dict or list"""

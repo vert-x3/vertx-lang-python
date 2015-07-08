@@ -1,7 +1,4 @@
 import sys
-import atexit
-
-from py4j.java_gateway import JavaGateway, GatewayClient
 
 from testmodel_python.testmodel.test_interface import TestInterface
 from testmodel_python.testmodel.refed_interface1 import RefedInterface1
@@ -13,12 +10,12 @@ from vertx_python import util
 
 util.vertx_init()
 
-jvm = util.jvm
-
-Assert = jvm.org.junit.Assert;
-obj = TestInterface(jvm.io.vertx.codegen.testmodel.TestInterfaceImpl())
-refed_obj = RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl())
-refed_obj2 = RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl())
+with util.handle_java_error():
+    jvm = util.jvm
+    Assert = jvm.org.junit.Assert;
+    obj = TestInterface(jvm.io.vertx.codegen.testmodel.TestInterfaceImpl())
+    refed_obj = RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl())
+    refed_obj2 = RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl())
 
 def testMethodWithBasicParams():
     print("MADE IT TO HERE")
@@ -1415,4 +1412,5 @@ def testMethodWithHandlerDataObject():
 if __name__ == "__main__":
     meth = sys.argv[3]
     print("calling {}".format(meth))
-    globals()[meth]()
+    with util.handle_java_error():
+        globals()[meth]()
