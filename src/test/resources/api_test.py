@@ -180,9 +180,9 @@ class TestAPI(unittest.TestCase):
     def testMethodWithHandlerDataObject(self):
         dct = dict(count=0)
         def handler(option):
-            self.assertEqual("foo", option.foo)
-            self.assertEqual(123, option.bar)
-            self.assertEqual(0.0, option.wibble)
+            self.assertEqual("foo", option['foo'])
+            self.assertEqual(123, option['bar'])
+            self.assertEqual(0.0, option['wibble'])
             dct['count'] += 1
         obj.method_with_handler_data_object(handler)
         self.assertEqual(dct['count'], 1)
@@ -191,37 +191,86 @@ class TestAPI(unittest.TestCase):
     def testMethodWithHandlerAsyncResultDataObject(self):
         dct = dict(count=0)
         def handler(option, err):
-            self.assertIsNone(option);
-            self.assertIsNotNone(err);
-            self.assertEqual("foobar!", err.getMessage());
-            dct['count'] += 1;
+            self.assertIsNone(err)
+            self.assertEqual("foo", option['foo'])
+            self.assertEqual(123, option['bar'])
+            self.assertEqual(0.0, option['wibble'])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_data_object(False, handler)
         self.assertEqual(dct['count'], 1)
 
 
-    #def testMethodWithHandlerAsyncResultDataObjectFails(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_data_object(true) { |err,val| self.is_nil(val); Assert.is_not_nil(err); Assert.equals(err.message, 'foobar!'); dct['count'] += 1 }
-        #self.equals(count, 1)
+    def testMethodWithHandlerAsyncResultDataObjectFails(self):
+        dct = dict(count=0)
+        def handler(option, err):
+            self.assertIsNone(option)
+            self.assertIsNotNone(err)
+            self.assertEqual("foobar!", err.getMessage())
+            dct['count'] += 1
+        obj.method_with_handler_async_result_data_object(True, handler)
+        self.assertEqual(dct['count'], 1)
 
 
-    #def testMethodWithHandlerListAndSet(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_and_set(
-            #Proc.new { |val| self.equals(val, %w(foo bar wibble)); dct['count'] += 1 },
-            #Proc.new { |val| self.equals(val, [5,12,100]); dct['count'] += 1 },
-            #Proc.new { |val| self.equals(val, Set.new(%w(foo bar wibble))); dct['count'] += 1 }) do |val|
-          #self.equals(val, Set.new([5,12,100])); dct['count'] += 1
-        #end
-        #self.equals(4, count)
+    def testMethodWithHandlerListAndSet(self):
+        dct = dict(count=0)
+        def handle_str_list(l):
+            self.assertEqual(l, list)
+            self.assertEqual("foo", l[0])
+            self.assertEqual("bar", l[1])
+            self.assertEqual("wibble", l[2])
+            dct['count'] += 1
+        def handle_int_list(l):
+            self.assertEqual(l, list)
+            self.assertEqual(5, l[0])
+            self.assertEqual(12, l[1])
+            self.assertEqual(100, l[2])
+            dct['count'] += 1
+        def handle_str_set(s):
+            self.assertEqual(s, set)
+            self.assertSetEqual(set(['foo', 'bar', 'wibble']), s)
+            dct['count'] += 1
+        def handle_int_set(s):
+            self.assertEqual(s, set)
+            self.assertSetEqual(set([5, 12, 100]), s)
+            dct['count'] += 1
+
+        obj.method_with_handler_list_and_set(handle_str_list, handle_int_list,
+                                             handle_str_set, handle_int_set)
+        self.assertEquals(dct['count'], 4)
 
 
-    #def testMethodWithHandlerAsyncResultListAndSet(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_string { |err,val| self.is_nil(err); Assert.equals(val, %w(foo bar wibble)); dct['count'] += 1 }
-        #obj.method_with_handler_async_result_list_integer { |err,val| self.is_nil(err); Assert.equals(val, [5,12,100]); dct['count'] += 1 }
-        #obj.method_with_handler_async_result_set_string { |err,val| self.is_nil(err); Assert.equals(val, Set.new(%w(foo bar wibble))); dct['count'] += 1 }
-        #obj.method_with_handler_async_result_set_integer { |err,val| self.is_nil(err); Assert.equals(val, Set.new([5,12,100])); dct['count'] += 1 }
-        #self.equals(4, count)
+    def testMethodWithHandlerAsyncResultListAndSet(self):
+        dct = dict(count=0)
+        def handle_str_list(l, err):
+            self.assertIsNone(err)
+            self.assertEqual(l, list)
+            self.assertEqual("foo", l[0])
+            self.assertEqual("bar", l[1])
+            self.assertEqual("wibble", l[2])
+            dct['count'] += 1
+        def handle_int_list(l, err):
+            self.assertIsNone(err)
+            self.assertEqual(l, list)
+            self.assertEqual(5, l[0])
+            self.assertEqual(12, l[1])
+            self.assertEqual(100, l[2])
+            dct['count'] += 1
+        def handle_str_set(s, err):
+            self.assertIsNone(err)
+            self.assertEqual(s, set)
+            self.assertSetEqual(set(['foo', 'bar', 'wibble']), s)
+            dct['count'] += 1
+        def handle_int_set(s, err):
+            self.assertIsNone(err)
+            self.assertEqual(s, set)
+            self.assertSetEqual(set([5, 12, 100]), s)
+            dct['count'] += 1
+
+        obj.method_with_handler_async_result_list_string(handle_str_list)
+        obj.method_with_handler_async_result_list_integer(handle_int_list)
+        obj.method_with_handler_async_result_set_string(handle_str_set)
+        obj.method_with_handler_async_result_set_integer(handle_int_set)
+        self.assertEquals(dct['count'], 4)
 
 
     #def testMethodWithHandlerListVertxGen(self):

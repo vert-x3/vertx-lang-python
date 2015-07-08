@@ -125,6 +125,10 @@ def python_to_java(obj):
         return list_to_json(obj)
     return obj
 
+
+def data_object_to_json(obj):
+    return java_to_python(obj.toJson())
+
 def java_to_python(obj):
     """Converts an arbitrary Java object to Python"""
     if obj is None:

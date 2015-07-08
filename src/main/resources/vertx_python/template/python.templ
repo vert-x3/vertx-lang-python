@@ -141,6 +141,10 @@ result.result()
 		@end{}
 	@else{returnType.kind == CLASS_JSON_OBJECT || returnType.kind == CLASS_JSON_ARRAY}
 		util.java_to_python(@includeNamed{templ})
+	@else{returnType.kind.basic || returnType.name.equals('void')}
+		@includeNamed{templ}
+	@else{returnType.kind == CLASS_DATA_OBJECT}
+		util.data_object_to_json(@includeNamed{templ})
 	@else{returnType.kind == CLASS_API}
 		@if{returnType.raw != null}
 			@if{returnType.raw.simpleName.equals("Throwable")}
