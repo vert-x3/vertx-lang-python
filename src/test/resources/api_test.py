@@ -18,13 +18,10 @@ with util.handle_java_error():
     refed_obj2 = RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl())
 
 def testMethodWithBasicParams():
-    print("MADE IT TO HERE")
-    obj.method_with_basic_params(b'123', 12345, 1234567, 1265615234, 12.345, 12.34566, True, 88, 'foobar')
-
+    obj.method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, True, 88, 'foobar')
 
 def testMethodWithBasicBoxedParams():
-    obj.method_with_basic_boxed_params(b'123', 12345, 1234567, 1265615234, 12.345, 12.34566, True, 88)
-
+    obj.method_with_basic_boxed_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, True, 88)
 
 def testMethodWithHandlerBasicTypes():
     dct = dict(count=0)
@@ -172,7 +169,8 @@ def testDataObjectParam():
 
 
 def testNullDataObjectParam():
-    obj.method_with_null_data_object_param(None);
+    data_object = {}
+    obj.method_with_null_data_object_param(data_object)
 
 
 def testMethodWithHandlerDataObject():
@@ -1414,3 +1412,5 @@ if __name__ == "__main__":
     print("calling {}".format(meth))
     with util.handle_java_error():
         globals()[meth]()
+        util.java_gateway.shutdown()
+

@@ -190,7 +190,7 @@ result.result()
 				param.type.name == 'double' || param.type.name == 'java.lang.Double'}
 				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, float)
 			@else{param.type.name == 'byte' || param.type.name == 'java.lang.Byte'}
-				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, bytes)
+				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, int)
 			@else{param.type.name == 'boolean' || param.type.name == 'java.lang.Boolean'}
 				@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, bool)
 			@else{param.type.name == 'char' || param.type.name == 'java.lang.Character'}

@@ -23,52 +23,50 @@ public class APITest extends PythonTestBase {
     runTest();
   }
 
-/*
- *  @Test
- *  public void testMethodWithBasicBoxedParams() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerBasicTypes() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultBasicTypes() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultBasicTypesFails() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithUserTypes() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testObjectParam() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testDataObjectParam() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testNullDataObjectParam() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerDataObject() throws Exception {
- *    runTest();
- *  }
- */
+  @Test
+  public void testMethodWithBasicBoxedParams() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerBasicTypes() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultBasicTypes() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultBasicTypesFails() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithUserTypes() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testObjectParam() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testDataObjectParam() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testNullDataObjectParam() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerDataObject() throws Exception {
+    runTest();
+  }
 /*
  *
  *  @Test

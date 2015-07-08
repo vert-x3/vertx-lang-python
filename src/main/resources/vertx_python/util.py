@@ -7,6 +7,15 @@ jvertx = None
 
 @contextmanager
 def handle_java_error():
+    """ Protect calls to the Java Gateway.
+    
+    This decorate ensures the properly cleanup is done if a call
+    to the Java Gateway throws an exception. Failure to do so can
+    leave the program in a hung state, because the Py4J callback
+    server thread will keep running in the background, preventing
+    the interpreter from exiting.
+    
+    """
     try:
         yield
     except Exception:
