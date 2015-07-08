@@ -1,5 +1,9 @@
+from __future__ import unicode_literals, print_function, absolute_import
+
 import json
 from contextlib import contextmanager
+
+from py4j.java_gateway import is_instance_of
 
 java_gateway = None
 jvm = None
@@ -19,8 +23,17 @@ def handle_java_error():
     try:
         yield
     except Exception:
-        java_gateway.shutdown()
+        vertx_shutdown()
         raise
+
+def vertx_shutdown():
+    global java_gateway
+    global jvm
+    global jvertx
+    java_gateway.close()
+    jvm = None
+    jvertx = None
+    java_gateway = None
 
 def vertx_init():
     """Initializes the Vert.x connection."""

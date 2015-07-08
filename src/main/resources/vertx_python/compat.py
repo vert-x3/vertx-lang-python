@@ -1,4 +1,4 @@
-from __future__ import unicode_literals, absolute_import
+from __future__ import unicode_literals, print_function, absolute_import
 
 import sys
 
@@ -8,3 +8,4 @@ if sys.version_info[0] < 3:
 else:
     long = int
     basestring = str
+    unicode = str

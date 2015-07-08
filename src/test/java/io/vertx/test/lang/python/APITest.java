@@ -67,19 +67,20 @@ public class APITest extends PythonTestBase {
   public void testMethodWithHandlerDataObject() throws Exception {
     runTest();
   }
+
+ 
+   @Test
+   public void testMethodWithHandlerAsyncResultDataObject() throws Exception {
+     runTest();
+   }
 /*
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultDataObject() throws Exception {
- *    runTest();
- *  }
- *
  *  @Test
  *  public void testMethodWithHandlerAsyncResultDataObjectFails() throws Exception {
  *    runTest();
  *  }
- *
- *  @Test
+ */
+   
+ /*  @Test
  *  public void testMethodWithHandlerListAndSet() throws Exception {
  *    runTest();
  *  }
