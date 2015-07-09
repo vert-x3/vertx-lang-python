@@ -77,35 +77,9 @@ def convert_double_to_java(x):
 def convert_float_to_java(x):
     return jvm.java.lang.Float(x)
 
-def convert_short_list_to_java(lst):
-    return list_to_json([convert_short_to_java(i) for i in lst])
-
-def convert_long_list_to_java(lst):
-    return list_to_json([convert_long_to_java(i) for i in lst])
-
-def convert_byte_list_to_java(lst):
-    return list_to_json([convert_byte_to_java(i) for i in lst])
-
-def convert_double_list_to_java(lst):
-    return list_to_json([convert_double_to_java(i) for i in lst])
-
-def convert_float_list_to_java(lst):
-    return list_to_json([convert_float_to_java(i) for i in lst])
-
 def json_to_python(obj):
     """Converts a Java JSON object to Python dict or list"""
     return json.loads(obj.encode()) if obj is not None else None
-
-def list_obj_to_python(obj, type):
-    """Converts a Java iterable of objects to a Python list"""
-    if obj is None:
-        return None
-    result = []
-    iterator = obj.iterator()
-    while iterator.hasNext():
-        val = iterator.next()
-        result.append(type(json.loads(val.encode())) if val is not None else None)
-    return result
 
 def list_to_json(obj):
     """Converts a Python list to Java JsonArray"""
@@ -124,7 +98,6 @@ def python_to_java(obj):
     elif isinstance(obj, list):
         return list_to_json(obj)
     return obj
-
 
 def data_object_to_json(obj):
     return java_to_python(obj.toJson())

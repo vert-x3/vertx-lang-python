@@ -178,103 +178,105 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.bsc.maven</groupId>
-        <artifactId>maven-processor-plugin</artifactId>
-        <version>2.2.4</version>
-        <executions>
-          <!-- Run the annotation processor on vertx-core and generate the python API -->
-          <execution>
-            <id>generate-vertx-core</id>
-            <goals>
-              <goal>process</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <systemProperties>
-                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
-              </systemProperties>
-              <processors>
-                <processor>io.vertx.codegen.CodeGenProcessor</processor>
-              </processors>
-              <optionMap>
-                <outputDirectory>${project.basedir}/src/main</outputDirectory>
-              </optionMap>
-              <sourceDirectory>${project.build.directory}/sources/vertx-core</sourceDirectory>
-            </configuration>
-          </execution>
-
-          <!-- We have to run the annotation processor again to process doc overrides -->
-          <execution>
-            <id>docgen-docs</id>
-            <goals>
-              <goal>process</goal>
-            </goals>
-            <phase>prepare-package</phase>
-            <configuration>
-              <systemProperties>
-                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
-              </systemProperties>
-              <processors>
-                <processor>io.vertx.docgen.DocGenProcessor</processor>
-              </processors>
-              <optionMap>
-                <docgen.output>${asciidoc.dir}/python</docgen.output>
-              </optionMap>
-              <sourceDirectory>${project.build.directory}/sources/vertx-core</sourceDirectory>
-            </configuration>
-          </execution>
-
-          <!-- We have to run the annotation processor again to process doc overrides -->
-          <execution>
-            <id>docgen-docoverrides</id>
-            <goals>
-              <goal>process</goal>
-            </goals>
-            <phase>prepare-package</phase>
-            <configuration>
-              <systemProperties>
-                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
-              </systemProperties>
-              <processors>
-                <processor>io.vertx.docgen.DocGenProcessor</processor>
-              </processors>
-              <optionMap>
-                <docgen.output>${asciidoc.dir}/python</docgen.output>
-              </optionMap>
-              <sourceDirectory>src/main/docoverride</sourceDirectory>
-            </configuration>
-          </execution>
-
-          <!-- Run the annotation processor on codegen and generate the python codegen -->
-          <execution>
-            <id>generate-codegen</id>
-            <goals>
-              <goal>process</goal>
-            </goals>
-            <phase>generate-test-sources</phase>
-            <configuration>
-              <systemProperties>
-                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
-              </systemProperties>
-              <processors>
-                <processor>io.vertx.codegen.CodeGenProcessor</processor>
-              </processors>
-              <optionMap>
-                <outputDirectory>${project.basedir}/src/test</outputDirectory>
-              </optionMap>
-              <sourceDirectory>${project.build.directory}/sources/codegen</sourceDirectory>
-            </configuration>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-          </dependency>
-        </dependencies>
-      </plugin>
+<!--
+   -      <plugin>
+   -        <groupId>org.bsc.maven</groupId>
+   -        <artifactId>maven-processor-plugin</artifactId>
+   -        <version>2.2.4</version>
+   -        <executions>
+   -          [> Run the annotation processor on vertx-core and generate the python API <]
+   -          <execution>
+   -            <id>generate-vertx-core</id>
+   -            <goals>
+   -              <goal>process</goal>
+   -            </goals>
+   -            <phase>generate-sources</phase>
+   -            <configuration>
+   -              <systemProperties>
+   -                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+   -              </systemProperties>
+   -              <processors>
+   -                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+   -              </processors>
+   -              <optionMap>
+   -                <outputDirectory>${project.basedir}/src/main</outputDirectory>
+   -              </optionMap>
+   -              <sourceDirectory>${project.build.directory}/sources/vertx-core</sourceDirectory>
+   -            </configuration>
+   -          </execution>
+   -
+   -          [> We have to run the annotation processor again to process doc overrides <]
+   -          <execution>
+   -            <id>docgen-docs</id>
+   -            <goals>
+   -              <goal>process</goal>
+   -            </goals>
+   -            <phase>prepare-package</phase>
+   -            <configuration>
+   -              <systemProperties>
+   -                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+   -              </systemProperties>
+   -              <processors>
+   -                <processor>io.vertx.docgen.DocGenProcessor</processor>
+   -              </processors>
+   -              <optionMap>
+   -                <docgen.output>${asciidoc.dir}/python</docgen.output>
+   -              </optionMap>
+   -              <sourceDirectory>${project.build.directory}/sources/vertx-core</sourceDirectory>
+   -            </configuration>
+   -          </execution>
+   -
+   -          [> We have to run the annotation processor again to process doc overrides <]
+   -          <execution>
+   -            <id>docgen-docoverrides</id>
+   -            <goals>
+   -              <goal>process</goal>
+   -            </goals>
+   -            <phase>prepare-package</phase>
+   -            <configuration>
+   -              <systemProperties>
+   -                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+   -              </systemProperties>
+   -              <processors>
+   -                <processor>io.vertx.docgen.DocGenProcessor</processor>
+   -              </processors>
+   -              <optionMap>
+   -                <docgen.output>${asciidoc.dir}/python</docgen.output>
+   -              </optionMap>
+   -              <sourceDirectory>src/main/docoverride</sourceDirectory>
+   -            </configuration>
+   -          </execution>
+   -
+   -          [> Run the annotation processor on codegen and generate the python codegen <]
+   -          <execution>
+   -            <id>generate-codegen</id>
+   -            <goals>
+   -              <goal>process</goal>
+   -            </goals>
+   -            <phase>generate-test-sources</phase>
+   -            <configuration>
+   -              <systemProperties>
+   -                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+   -              </systemProperties>
+   -              <processors>
+   -                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+   -              </processors>
+   -              <optionMap>
+   -                <outputDirectory>${project.basedir}/src/test</outputDirectory>
+   -              </optionMap>
+   -              <sourceDirectory>${project.build.directory}/sources/codegen</sourceDirectory>
+   -            </configuration>
+   -          </execution>
+   -        </executions>
+   -        <dependencies>
+   -          <dependency>
+   -            <groupId>junit</groupId>
+   -            <artifactId>junit</artifactId>
+   -            <version>4.11</version>
+   -          </dependency>
+   -        </dependencies>
+   -      </plugin>
+   -->
       <plugin>
         <groupId>org.asciidoctor</groupId>
         <artifactId>asciidoctor-maven-plugin</artifactId>

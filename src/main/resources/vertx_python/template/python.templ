@@ -12,9 +12,7 @@
 		}
 		return false;
 	}
-}
 
-@code{
 	def getAllParamNames(methods) {
 		paramNames = [];
 		for (method : methods) {
@@ -26,9 +24,7 @@
 		}
 		return paramNames;
 	}
-}
 
-@code{
 	def getParamNames(method) {
 		paramNames = [];
 		for (param : method.params) {
@@ -36,130 +32,149 @@
 		}
 		return paramNames;
 	}
-}
 
-@code{
 	def convertName(name) {
 		reserved = ['if', 'elif', 'else', 'from', 'in', 'int', 'bool', 'long', 'bytes', 'str', 'unicode', 'not', 'and', 'or', 'as', 'try', 'except', 'raise', 'return', 'lambda', 'finally', 'continue', 'for', 'while', 'yield', 'pass', 'with', 'assert', 'break', 'class', 'def', 'exec', 'del', 'import'];
 		return reserved.contains(name) ? helper.convertCamelCaseToUnderscores('_' + name) : helper.convertCamelCaseToUnderscores(name);
 	}
+
+	def genMethodCall(method) {
+		out = "";
+		if (static) {
+			out += "util.jvm" + ifacePackageName + "." + ifaceSimpleName;
+		} else {
+			out += "self.j" + ifaceName;
+		}
+		out += "." + method.name + "(";
+		for (param : method.params) {
+			if (param != method.params[0]) {
+				out += ", ";
+			}
+			argName = convertName(param.name);
+			out += convParam(overloaded, argName, param.type);
+		}
+		out += ")";
+		return out;	
+	}
+
+	/*
+     * Generate the code that converts a Java return to the corresponding Python value.
+     * This is also used for converting values returned from Java API via handlers.
+     */
+	def convReturn(type, expr) {
+		var kind = type.kind;
+		if (kind == CLASS_LIST) {
+			var elementType = type.args[0];
+			return "[" + convReturn(elementType, "elt") + " for elt in " + expr + "]";
+		} else if (kind == CLASS_SET) {
+			var elementType = type.args[0];
+			return "set([" + convReturn(elementType, "elt") + " for elt in " + expr + "])";
+		} else if (kind == CLASS_JSON_OBJECT) {
+			return "util.java_to_python(" + expr + ")";
+		} else if (kind == CLASS_JSON_ARRAY) {
+			return "util.java_to_python(" + expr + ")";
+		} else if (kind == CLASS_DATA_OBJECT) {
+			return "util.data_object_to_json(" + expr + ")";
+		} else if (kind == CLASS_API) {
+			if (type.raw != null) {
+				if (type.raw.simpleName.equals("Throwable")) {
+					return "util.java_to_python(" + expr + ")";
+				} else {
+					return type.raw.simpleName + "(" + expr + ")";
+				}
+			} else {
+				return "util.java_to_python(" + expr ")";
+			}
+		} else if (kind.basic) {
+			var typeName = type.name;
+			if (typeName == 'char' || typeName == 'java.lang.Character') {
+				return expr;
+			} else if (typeName == 'long' || typeName == 'java.lang.Long') {
+				return expr;
+			} else if (typeName == 'byte' || typeName == 'java.lang.Byte') {
+				return expr;
+			} else if (typeName == 'short' || typeName == 'java.lang.Short') {
+				return expr;
+			} else if (typeName == 'float' || typeName == 'java.lang.Float') {
+				return expr;
+			} else if (typeName == 'double' || typeName == 'java.lang.Double') {
+				return expr;
+			} else {
+				return expr;
+			}
+		}
+		return "util.java_to_python(" + expr + ")";
+	}
+
+	/*
+     * Generate the code that converts a parameter from Python to Java to 
+     * call a Java API method.
+	 */
+	def getHandlerName(type) {
+		if (type.kind == CLASS_LIST || type.kind == CLASS_SET) {
+			var elem = type.args[0];
+			var elemname = getHandlerName(elem);
+		} else {
+			var elemname = "";
+		}
+		if (type.raw != null) {
+			return type.raw.simpleName + elemname;
+		} else {
+			return type.name + elemname;
+		}
+	}
+
+	def convParam(overloaded, argName, type) {
+		var paramName = argName;
+		var kind = type.kind;
+		var typeName = type.name;
+		if (kind == CLASS_HANDLER) {
+			var element = type.args[0];
+			if (element.kind == CLASS_ASYNC_RESULT) {
+				var innerarg = element.args[0];
+				return "Async" + getHandlerName(innerarg) + "Handler(" + convertName(paramName) + ")";
+			} else {
+				return getHandlerName(element) + "Handler(" + convertName(paramName) + ")";
+            }
+		} else if (kind == CLASS_JSON_OBJECT) {
+			return "util.dict_to_json(" + convertName(paramName) + ")";
+        } else if (kind == CLASS_JSON_ARRAY) {
+			return "util.list_to_json(" + convertName(paramName) + ")";
+        } else if (kind == CLASS_DATA_OBJECT) {
+			return type.simpleName + "(util.dict_to_json(" + convertName(paramName) + ")" + 
+                   " if " + convertName(paramName) + " is not None else None)";
+
+        } else if (kind.basic) {
+			if (typeName == 'char' || typeName == 'java.lang.Character') {
+				return "util.convert_char(" + convertName(paramName) + ")";
+			} else if (typeName == 'long' || typeName == 'java.lang.Long') {
+				return "util.convert_long_to_java(" + convertName(paramName) + ")";
+			} else if (typeName == 'byte' || typeName == 'java.lang.Byte') {
+				return "util.convert_byte_to_java(" + convertName(paramName) + ")";
+			} else if (typeName == 'short' || typeName == 'java.lang.Short') {
+				return "util.convert_short_to_java(" + convertName(paramName) + ")";
+			} else if (typeName == 'float' || typeName == 'java.lang.Float') {
+				return "util.convert_float_to_java(" + convertName(paramName) + ")";
+			} else if (typeName == 'double' || typeName == 'java.lang.Double') {
+				return "util.convert_double_to_java(" + convertName(paramName) + ")";
+			} else {
+				return convertName(paramName);
+			}
+        } else if (kind == CLASS_LIST) {
+			var element = type.args[0];
+			return "[" + convParam(overloaded, "i", element)  +" for i in " + paramName + "]"
+        } else if (kind == CLASS_SET) {
+			var element = type.args[0];
+			return "set([" + convParam(overloaded, "i", element)  +" for i in " + paramName + "])"
+		} else if (kind == CLASS_OBJECT) {
+			return "util.python_to_java(" + paramName + ")";
+		} else if (kind.basic || typeName.equals("java.lang.Void")) {
+			return paramName;
+		} else {
+			return paramName + "._jdel()";
+        }
+	}
 }
-
-@declare{'genMethodCall'}
-@if{static}util.jvm.@{ifacePackageName}.@{ifaceSimpleName}@else{}self.j@{ifaceName}@end{}.@{method.name}(
-	@foreach{param: method.params}
-		@code{argName=convertName(param.name);}
-		@includeNamed{'convParam'}
-	@end{", "})
-@end{}
-
-@comment{"Generate the code that converts a parameter from Python to Java to call a Java API method"}
-@comment{"============================================================================================="}
-
-@declare{'convParam'}
-	@code{paramName = overloaded ? argName : param.name;}
-	@if{param.type.kind == CLASS_HANDLER}
-		@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
-			@if{param.type.args[0].args[0].raw != null}
-				Async@{param.type.args[0].args[0].raw.simpleName}Handler(@{convertName(paramName)})
-			@else{}
-				Async@{param.type.args[0].args[0].name}Handler(@{convertName(paramName)})
-			@end{}
-		@else{}
-			@if{param.type.args[0].raw != null}
-				@{param.type.args[0].raw.simpleName}Handler(@{convertName(paramName)})
-			@else{}
-				@{param.type.args[0].name}Handler(@{convertName(paramName)})
-			@end{}
-		@end{}
-	@else{param.type.kind == CLASS_JSON_OBJECT}
-		util.dict_to_json(@{convertName(paramName)})
-	@else{param.type.kind == CLASS_JSON_ARRAY}
-		util.list_to_json(@{convertName(paramName)})
-	@else{param.dataObject}
-		@{param.type.simpleName}(util.dict_to_json(@{convertName(paramName)})) if @{convertName(paramName)} is not None else None
-	@else{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
-		util.convert_char(@{convertName(paramName)})
-	@else{param.type.name == 'long' || param.type.name == 'java.lang.Long'}
-		util.convert_long_to_java(@{convertName(paramName)})
-	@else{param.type.name == 'byte' || param.type.name == 'java.lang.Byte'}
-		util.convert_byte_to_java(@{convertName(paramName)})
-	@else{param.type.name == 'short' || param.type.name == 'java.lang.Short'}
-		util.convert_short_to_java(@{convertName(paramName)})
-	@else{param.type.name == 'float' || param.type.name == 'java.lang.Float'}
-		util.convert_float_to_java(@{convertName(paramName)})
-	@else{param.type.name == 'double' || param.type.name == 'java.lang.Double'}
-		util.convert_double_to_java(@{convertName(paramName)})
-	@else{param.type.kind == CLASS_LIST}
-		@if{param.type.args[0].name == 'char' || param.type.args[0].name == 'java.lang.Character'}
-			util.convert_char(@{convertName(paramName)})
-		@else{param.type.args[0].name == 'long' || param.type.args[0].name == 'java.lang.Long'}
-			util.convert_long_list_to_java(@{convertName(paramName)})
-		@else{param.type.args[0].name == 'byte' || param.type.args[0].name == 'java.lang.Byte'}
-			util.convert_byte_list_to_java(@{convertName(paramName)})
-		@else{param.type.args[0].name == 'short' || param.type.args[0].name == 'java.lang.Short'}
-			util.convert_short_list_to_java(@{convertName(paramName)})
-		@else{param.type.args[0].name == 'float' || param.type.args[0].name == 'java.lang.Float'}
-			util.convert_float_list_to_java(@{convertName(paramName)})
-		@else{param.type.args[0].name == 'double' || param.type.args[0].name == 'java.lang.Double'}
-			util.convert_double_list_to_java(@{convertName(paramName)})
-		@else{}
-			util.python_to_java(@{convertName(paramName)})
-		@end{}
-	@else{param.type.kind == CLASS_OBJECT}
-		util.python_to_java(@{convertName(paramName)})
-	@else{param.type.kind.basic || param.type.name.equals("java.lang.Void")}
-		@{convertName(paramName)}
-	@else{}
-		@{convertName(paramName)}._jdel()
-	@end{}
-@end{}
-
-@declare{'resultVal'}
-result
-@end{}
-
-@declare{'arVal'}
-result.result()
-@end{}
-
-@comment{"Generate the code that converts a Java return to the corresponding Python value"}
-@comment{"This is also used for converting values returned from Java API via handlers"}
-@comment{"==================================================================================="}
-
-@declare{'convReturn'}
-	@if{returnType.kind == CLASS_LIST || returnType.kind == CLASS_SET}
-		@code{elementType=returnType.args[0]}
-		@if{elementType.kind == CLASS_JSON_OBJECT}
-			util.list_obj_to_python(@includeNamed{templ}, dict)
-		@else{elementType.kind == CLASS_JSON_ARRAY}
-			util.list_obj_to_python(@includeNamed{templ}, list)
-		@else{elementType.kind == CLASS_API}
-			util.list_obj_to_python(@includeNamed{templ}, @{elementType.raw.simpleName})
-		@else{}
-			@includeNamed{templ}
-		@end{}
-	@else{returnType.kind == CLASS_JSON_OBJECT || returnType.kind == CLASS_JSON_ARRAY}
-		util.java_to_python(@includeNamed{templ})
-	@else{returnType.kind.basic || returnType.name.equals('void')}
-		@includeNamed{templ}
-	@else{returnType.kind == CLASS_DATA_OBJECT}
-		util.data_object_to_json(@includeNamed{templ})
-	@else{returnType.kind == CLASS_API}
-		@if{returnType.raw != null}
-			@if{returnType.raw.simpleName.equals("Throwable")}
-				util.java_to_python(@includeNamed{templ})
-			@else{}
-				@{returnType.raw.simpleName}(@includeNamed{templ})
-			@end{}
-		@else{}
-			util.java_to_python(@includeNamed{templ})
-		@end{}
-	@else{}
-		@comment{'This will probably happen if the return type is generic'}
-		util.java_to_python(@includeNamed{templ})
-	@end{}
-@end{}
 
 @comment{"Generate a Python condition"}
 @comment{"==========================="}
@@ -310,17 +325,17 @@ result.result()
 			@if{requiresTypeCheck([baseMethod])}
 				@{ind}    if @includeNamed{'genCondition';method=baseMethod;}:\n
 				@if{baseMethod.fluent}
-					@{ind}        @includeNamed{'genMethodCall'; method=baseMethod}\n
+					@{ind}        @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType; method=baseMethod}\n
+					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
 				@end{}
 				@{ind}    else:\n
 				@{ind}        raise TypeError("Invalid arguments for @{convertName(methodName)}")\n
 			@else{}
 				@if{baseMethod.fluent}
-					@{ind}    @includeNamed{'genMethodCall'; method=baseMethod}\n
+					@{ind}    @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}    return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType; method=baseMethod}\n
+					@{ind}    return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
 				@end{}
 			@end{}
 		@else{}
@@ -328,26 +343,26 @@ result.result()
 			@foreach{method: childMethods}
 				@{ind}    @if{mcnt == 0}if @code{mcnt++}@else{}elif @end{}@includeNamed{'genCondition'}:\n
 				@if{method.fluent}
-					@{ind}        @includeNamed{'genMethodCall'}\n
+					@{ind}        @{genMethodCall(method)}\n
 				@else{}
-					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=method.returnType}\n
+					@{ind}        return @{convReturn(method.returnType, genMethodCall(method))}\n
 				@end{}
 			@end{}
 			@if{requiresTypeCheck([baseMethod])}
 				@{ind}    elif @includeNamed{'genCondition';method=baseMethod;}:\n
 				@if{baseMethod.fluent}
-					@{ind}        @includeNamed{'genMethodCall'; method=baseMethod}\n
+					@{ind}        @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType; method=baseMethod}\n
+					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
 				@end{}
 				@{ind}    else:\n
 				@{ind}        raise TypeError("Invalid arguments for @{convertName(methodName)}")\n
 			@else{}
 				@{ind}    else:\n
 				@if{baseMethod.fluent}
-					@{ind}        @includeNamed{'genMethodCall'; method=baseMethod}\n
+					@{ind}        @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}        return @includeNamed{'convReturn'; templ='genMethodCall'; returnType=baseMethod.returnType; method=baseMethod}\n
+					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
 				@end{}
 			@end{}
 			@if{baseMethod.fluent}
@@ -362,55 +377,50 @@ result.result()
 @comment{"========================="}
 
 @code{handlers = []}
-
 @declare{'genHandlers'}
 	@code{methodList = methodsByName.get(methodName); overloaded = methodList.size() > 1; method = methodList.get(0);}
 	@foreach{method: methodList}
 		@foreach{param: method.params}
 			@if{param.type.kind == CLASS_HANDLER && !handlers.contains(param.type.name)}
-				@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
-					@if{param.type.args[0].args[0].raw != null}
-						@code{className = 'Async' + param.type.args[0].args[0].raw.simpleName + 'Handler'}
+				@if{param.type.kind == CLASS_HANDLER}
+					@code{element = param.type.args[0]}
+					@if{element.kind == CLASS_ASYNC_RESULT}
+						@code{className = 'Async' + getHandlerName(element.args[0]) + 'Handler'}
 					@else{}
-						@code{className = 'Async' + param.type.args[0].args[0].name + 'Handler'}
+						@code{className = getHandlerName(element) + 'Handler'}
 					@end{}
-				@else{}
-					@if{param.type.args[0].raw != null}
-						@code{className = param.type.args[0].raw.simpleName + 'Handler'}
-					@else{}
-						@code{className = param.type.args[0].name + 'Handler'}
+					@if{!handlers.contains(className)}
+						@code{handlers.add(className)}
+						class @{className}(object):\n
+						    class Java:\n
+						        implements = ['io.vertx.core.Handler']\n
+						    def __init__(self, handler):\n
+						        self.handler = handler\n
+						    def handle(self, result):\n
+						        try:\n
+							@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
+						            if result.succeeded():\n
+								@if{param.type.args[0].args[0].name.startsWith('java.lang.Void')}
+						                self.handler(None, None)\n
+								@else{}
+						                self.handler(@{convReturn(param.type.args[0].args[0], "result.result()")}, None)\n
+								@end{}
+						            else:\n
+						                self.handler(None, result.cause())\n
+							@else{}
+								@if{param.type.args[0].name.startsWith('java.lang.Void')}
+						            self.handler(None)\n
+								@else{}
+						            self.handler(@{convReturn(param.type.args[0], "result")})\n
+								@end{}
+							@end{}
+						        except Exception:\n
+						            import traceback\n
+						            traceback.print_exc()\n
+						            raise\n
+						\n
 					@end{}
 				@end{}
-				class @{className}(object):\n
-				    class Java:\n
-				        implements = ['io.vertx.core.Handler']\n
-				    def __init__(self, handler):\n
-				        self.handler = handler\n
-				    def handle(self, result):\n
-				        try:\n
-					@if{param.type.args[0].kind == CLASS_ASYNC_RESULT}
-				            if result.succeeded():\n
-						@if{param.type.args[0].args[0].name.startsWith('java.lang.Void')}
-				                self.handler(None, None)\n
-						@else{}
-				                self.handler(@includeNamed{'convReturn'; templ='arVal'; returnType=param.type.args[0].args[0]}, None)\n
-						@end{}
-				            else:\n
-				                self.handler(None, result.cause())\n
-					@else{}
-						@if{param.type.args[0].name.startsWith('java.lang.Void')}
-				            self.handler(None)\n
-						@else{}
-				            self.handler(@includeNamed{'convReturn'; templ='resultVal'; returnType=param.type.args[0]})\n
-						@end{}
-					@end{}
-				        except Exception:\n
-				            import traceback\n
-				            traceback.print_exc()\n
-				            raise\n
-				
-				\n
-				@code{handlers.add(param.type.name)}
 			@end{}
 		@end{}
 	@end{}
@@ -505,7 +515,7 @@ class @{ifaceSimpleName}(@foreach{superType: superTypes}@{superType.raw.simpleNa
 @end{}
 
 @comment{"Iterate through methods again and create result handler classes"}
-
 @foreach{methodName:methodsByName.keySet()}
 	@includeNamed{'genHandlers'}
 @end{}
+

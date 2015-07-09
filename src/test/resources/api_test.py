@@ -4,6 +4,7 @@ import unittest
 
 from testmodel_python.testmodel.test_interface import TestInterface
 from testmodel_python.testmodel.refed_interface1 import RefedInterface1
+from testmodel_python.testmodel.refed_interface2 import RefedInterface2
 from testmodel_python.testmodel.factory import Factory
 from acme_python.pkg.my_interface import MyInterface
 from acme_python.sub.sub_interface import SubInterface
@@ -214,23 +215,23 @@ class TestAPI(unittest.TestCase):
     def testMethodWithHandlerListAndSet(self):
         dct = dict(count=0)
         def handle_str_list(l):
-            self.assertEqual(l, list)
+            self.assertEqual(type(l), list)
             self.assertEqual("foo", l[0])
             self.assertEqual("bar", l[1])
             self.assertEqual("wibble", l[2])
             dct['count'] += 1
         def handle_int_list(l):
-            self.assertEqual(l, list)
+            self.assertEqual(type(l), list)
             self.assertEqual(5, l[0])
             self.assertEqual(12, l[1])
             self.assertEqual(100, l[2])
             dct['count'] += 1
         def handle_str_set(s):
-            self.assertEqual(s, set)
+            self.assertEqual(type(s), set)
             self.assertSetEqual(set(['foo', 'bar', 'wibble']), s)
             dct['count'] += 1
         def handle_int_set(s):
-            self.assertEqual(s, set)
+            self.assertEqual(type(s), set)
             self.assertSetEqual(set([5, 12, 100]), s)
             dct['count'] += 1
 
@@ -243,26 +244,26 @@ class TestAPI(unittest.TestCase):
         dct = dict(count=0)
         def handle_str_list(l, err):
             self.assertIsNone(err)
-            self.assertEqual(l, list)
+            self.assertEqual(type(l), list)
             self.assertEqual("foo", l[0])
             self.assertEqual("bar", l[1])
             self.assertEqual("wibble", l[2])
             dct['count'] += 1
         def handle_int_list(l, err):
             self.assertIsNone(err)
-            self.assertEqual(l, list)
+            self.assertEqual(type(l), list)
             self.assertEqual(5, l[0])
             self.assertEqual(12, l[1])
             self.assertEqual(100, l[2])
             dct['count'] += 1
         def handle_str_set(s, err):
             self.assertIsNone(err)
-            self.assertEqual(s, set)
+            self.assertEqual(type(s), set)
             self.assertSetEqual(set(['foo', 'bar', 'wibble']), s)
             dct['count'] += 1
         def handle_int_set(s, err):
             self.assertIsNone(err)
-            self.assertEqual(s, set)
+            self.assertEqual(type(s), set)
             self.assertSetEqual(set([5, 12, 100]), s)
             dct['count'] += 1
 
@@ -273,74 +274,85 @@ class TestAPI(unittest.TestCase):
         self.assertEquals(dct['count'], 4)
 
 
-    #def testMethodWithHandlerListVertxGen(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_vertx_gen do |val|
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 2)
-          #self.equals(val[0].class, Testmodel::RefedInterface1)
-          #self.equals(val[0].get_string, 'foo')
-          #self.equals(val[1].class, Testmodel::RefedInterface1)
-          #self.equals(val[1].get_string, 'bar')
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
+    def testMethodWithHandlerListVertxGen(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 2)
+            self.assertEqual(type(val[0]), RefedInterface1)
+            self.assertEqual(val[0].get_string(), 'foo')
+            self.assertEqual(type(val[1]), RefedInterface1)
+            self.assertEqual(val[1].get_string(), 'bar')
+            dct['count'] += 1
+        obj.method_with_handler_list_vertx_gen()
+        self.assertEquals(dct['count'], 1)
+
+    def testMethodWithHandlerUserTypes(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEquals(type(val), RefedInterface1)
+            self.assertEquals(val.get_string(), 'echidnas')
+            dct['count'] += 1
+        obj.method_with_handler_user_types()
+        self.assertEquals(dct['count'], 1)
+
+    def testMethodWithHandlerListAbstractVertxGen(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 2)
+            self.assertisInstance(val[0], RefedInterface2)
+            self.assertEqual(val[0].get_string(), 'abstractfoo')
+            self.assertisInstance(val[1], RefedInterface2)
+            self.assertEqual(val[1].get_string(), 'abstractbar')
+            dct['count'] += 1
+
+        obj.method_with_handler_list_abstract_vertx_gen()
+        self.assertEquals(dct['count'], 1)
 
 
-    #def testMethodWithHandlerListAbstractVertxGen(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_abstract_vertx_gen do |val|
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 2)
-          #self.equals(val[0].is_a?(Testmodel::RefedInterface2), true)
-          #self.equals(val[0].get_string, 'abstractfoo')
-          #self.equals(val[1].is_a?(Testmodel::RefedInterface2), true)
-          #self.equals(val[1].get_string, 'abstractbar')
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
+    def testMethodWithHandlerAsyncResultListVertxGen(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 2)
+            self.assertEqual(type(val[0]), RefedInterface1)
+            self.assertEqual(val[0].get_string(), 'foo')
+            self.assertEqual(type(val[1]), RefedInterface1)
+            self.assertEqual(val[1].get_string(), 'bar')
+            dct['count'] += 1
+        obj.method_with_handler_list_vertx_gen()
+        self.assertEquals(dct['count'], 1)
 
 
-    #def testMethodWithHandlerAsyncResultListVertxGen(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_vertx_gen do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 2)
-          #self.equals(val[0].class, Testmodel::RefedInterface1)
-          #self.equals(val[0].get_string, 'foo')
-          #self.equals(val[1].class, Testmodel::RefedInterface1)
-          #self.equals(val[1].get_string, 'bar')
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
+    def testMethodWithHandlerAsyncResultListAbstractVertxGen(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 2)
+            self.assertisInstance(val[0], RefedInterface2)
+            self.assertEqual(val[0].get_string(), 'abstractfoo')
+            self.assertisInstance(val[1], RefedInterface2)
+            self.assertEqual(val[1].get_string(), 'abstractbar')
+            dct['count'] += 1
+
+        obj.method_with_handler_list_abstract_vertx_gen()
+        self.assertEquals(dct['count'], 1)
 
 
-    #def testMethodWithHandlerAsyncResultListAbstractVertxGen(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_abstract_vertx_gen do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 2)
-          #self.equals(val[0].is_a?(Testmodel::RefedInterface2), true)
-          #self.equals(val[0].get_string, 'abstractfoo')
-          #self.equals(val[1].is_a?(Testmodel::RefedInterface2), true)
-          #self.equals(val[1].get_string, 'abstractbar')
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetVertxGen(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_vertx_gen do |val|
-          #self.equals(val.class, Set)
-          #self.equals(val.size, 2)
-          #val.each { |elt| self.equals(elt.class, Testmodel::RefedInterface1) }
-          #self.equals(val.map { |o| o.get_string }.to_set, Set.new(%w(foo bar)))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
+    def testMethodWithHandlerSetVertxGen(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), set)
+            self.assertEqual(len(val), 2)
+            for item in val:
+                self.assertEqual(type(val), RefedInterface1)
+                self.assertSetEqual(val, set(['foo', 'bar']))
+            dct['count'] += 1
+        obj.method_with_handler_list_vertx_gen()
+        self.assertEquals(dct['count'], 1)
 
 
     #def testMethodWithHandlerSetAbstractVertxGen(self):
@@ -744,16 +756,6 @@ class TestAPI(unittest.TestCase):
         #obj.method_with_handler_async_result_set_null_data_object do |err,val|
           #self.is_nil(err)
           #self.equals(val, Set.new([nil]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerUserTypes(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_user_types do |val|
-          #self.equals(val.class, Testmodel::RefedInterface1)
-          #self.equals(val.get_string, 'echidnas')
           #dct['count'] += 1
         #end
         #self.equals(1, count)
