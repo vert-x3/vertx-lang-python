@@ -116,6 +116,44 @@ public class APITest extends PythonTestBase {
     runTest();
   }
 
+  @Test
+  public void testMethodWithHandlerSetAbstractVertxGen() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultSetVertxGen() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMethodWithHandlerAsyncResultSetAbstractVertxGen() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerListJsonObject() throws Exception {
+    runTest();
+  }
+
+/*
+ *  @Test
+ *  public void testMethodWithHandlerListNullJsonObject() throws Exception {
+ *    runTest();
+ *  }
+ *
+ *  @Test
+ *  public void testMethodWithHandlerListComplexJsonObject() throws Exception {
+ *    runTest();
+ *  }
+ */
+
+  /*
+   *@Test
+   *public void testMethodWithHandlerAsyncResultListJsonObject() throws Exception {
+   *  runTest();
+   *}
+   */
+
   /*
    *@Test
    *public void testMethodWithHandlerAsyncResultUserTypes() throws Exception {
@@ -159,26 +197,6 @@ public class APITest extends PythonTestBase {
  */
  /*  @Test
  *  public void testMethodWithHandlerAsyncResultGenericUserType() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetAbstractVertxGen() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerListJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerListNullJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerListComplexJsonObject() throws Exception {
  *    runTest();
  *  }
  */
@@ -244,21 +262,6 @@ public class APITest extends PythonTestBase {
  */
  /*  @Test
  *  public void testMethodWithHandlerNullSetDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetVertxGen() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetAbstractVertxGen() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultListJsonObject() throws Exception {
  *    runTest();
  *  }
  */
