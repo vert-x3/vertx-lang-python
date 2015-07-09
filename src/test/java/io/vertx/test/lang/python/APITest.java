@@ -18,104 +18,98 @@ public class APITest extends PythonTestBase {
 
   // Test params
 
-/*
- *  @Test
- *  public void testMethodWithBasicParams() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithBasicBoxedParams() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerBasicTypes() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultBasicTypes() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultBasicTypesFails() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithUserTypes() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testObjectParam() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testDataObjectParam() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testNullDataObjectParam() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerDataObject() throws Exception {
- *    runTest();
- *  }
- * 
- *  @Test
- *  public void testMethodWithHandlerAsyncResultDataObject() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultDataObjectFails() throws Exception {
- *    runTest();
- *  }
- *   
- *  @Test
- *  public void testMethodWithHandlerListAndSet() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultListAndSet() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerListVertxGen() throws Exception {
- *    runTest();
- *  }
- */
-/*
- *  @Test
- *  public void testMethodWithHandlerListAbstractVertxGen() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerUserTypes() throws Exception {
- *    runTest();
- *  }
- */
-/*
- *  @Test
- *  public void testMethodWithHandlerAsyncResultListVertxGen() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultListAbstractVertxGen() throws Exception {
- *    runTest();
- *  }
- */
+  @Test
+  public void testMethodWithBasicParams() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithBasicBoxedParams() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerBasicTypes() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultBasicTypes() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultBasicTypesFails() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithUserTypes() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testObjectParam() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testDataObjectParam() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testNullDataObjectParam() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerDataObject() throws Exception {
+    runTest();
+  }
+ 
+  @Test
+  public void testMethodWithHandlerAsyncResultDataObject() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultDataObjectFails() throws Exception {
+    runTest();
+  }
+   
+  @Test
+  public void testMethodWithHandlerListAndSet() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultListAndSet() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerListVertxGen() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMethodWithHandlerListAbstractVertxGen() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerUserTypes() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMethodWithHandlerAsyncResultListVertxGen() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultListAbstractVertxGen() throws Exception {
+    runTest();
+  }
 
   @Test
   public void testMethodWithHandlerSetVertxGen() throws Exception {
