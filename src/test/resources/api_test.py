@@ -10,6 +10,7 @@ from acme_python.pkg.my_interface import MyInterface
 from acme_python.sub.sub_interface import SubInterface
 
 from vertx_python import util
+from vertx_python.compat import long, unicode
 
 util.vertx_init()
 
@@ -116,7 +117,7 @@ class TestAPI(unittest.TestCase):
             dct['count'] += 1
         def string_handler(s, err):
             self.assertEqual(type(s), str)
-            self.assertEqual('quux!', str)
+            self.assertEqual('quux!', s)
             self.assertIsNone(err)
             dct['count'] += 1
         obj.method_with_handler_async_result_byte(False, byte_handler)
@@ -126,7 +127,7 @@ class TestAPI(unittest.TestCase):
         obj.method_with_handler_async_result_float(False, float_handler)
         obj.method_with_handler_async_result_double(False, double_handler)
         obj.method_with_handler_async_result_boolean(False, boolean_handler)
-        obj.method_with_handler_async_result_char(False, char_handler)
+        obj.method_with_handler_async_result_character(False, char_handler)
         obj.method_with_handler_async_result_string(False, string_handler)
         self.assertEqual(dct['count'], 9)
 
@@ -146,7 +147,7 @@ class TestAPI(unittest.TestCase):
         obj.method_with_handler_async_result_float(True, handler)
         obj.method_with_handler_async_result_double(True, handler)
         obj.method_with_handler_async_result_boolean(True, handler)
-        obj.method_with_handler_async_result_char(True, handler)
+        obj.method_with_handler_async_result_character(True, handler)
         obj.method_with_handler_async_result_string(True, handler)
         self.assertEqual(dct['count'], 9)
 
@@ -169,13 +170,13 @@ class TestAPI(unittest.TestCase):
 
 
     def testDataObjectParam(self):
-        data_object = {"foo" : "Hello", "bar" : 123, "wibble" : 1.23}
-        obj.method_with_data_object_param(data_object)
+        data_object = {"foo" : "hello", "bar" : 123, "wibble" : 1.23}
+        obj.method_with_data_object_param(**data_object)
 
 
     def testNullDataObjectParam(self):
         data_object = {}
-        obj.method_with_null_data_object_param(data_object=data_object)
+        obj.method_with_null_data_object_param(**data_object)
 
 
     def testMethodWithHandlerDataObject(self):
@@ -349,9 +350,10 @@ class TestAPI(unittest.TestCase):
             self.assertEqual(len(val), 2)
             for item in val:
                 self.assertEqual(type(item), RefedInterface1)
-            self.assertSetEqual(val, set(['foo', 'bar']))
+            self.assertSetEqual(set([x.get_string() for x in val]), 
+                                set(['foo', 'bar']))
             dct['count'] += 1
-        obj.method_with_handler_list_vertx_gen(handler)
+        obj.method_with_handler_set_vertx_gen(handler)
         self.assertEqual(dct['count'], 1)
 
 
@@ -362,7 +364,8 @@ class TestAPI(unittest.TestCase):
             self.assertEqual(len(val), 2)
             for item in val:
                 self.assertIsInstance(item, RefedInterface2)
-            self.assertSetEqual(val, set(['abstractfoo', 'abstractbar']))
+            self.assertSetEqual(set([x.get_string() for x in val]), 
+                                set(['abstractfoo', 'abstractbar']))
             dct['count'] += 1
 
         obj.method_with_handler_set_abstract_vertx_gen(handler)
@@ -377,7 +380,8 @@ class TestAPI(unittest.TestCase):
             self.assertEqual(len(val), 2)
             for item in val:
                 self.assertEqual(type(item), RefedInterface1)
-            self.assertSetEqual(set([x.get_string() for x in val]), set(['foo', 'bar']))
+            self.assertSetEqual(set([x.get_string() for x in val]), 
+                                set(['foo', 'bar']))
             dct['count'] += 1
 
         obj.method_with_handler_async_result_set_vertx_gen(handler)
@@ -392,7 +396,8 @@ class TestAPI(unittest.TestCase):
             self.assertEqual(len(val), 2)
             for item in val:
                 self.assertIsInstance(item, RefedInterface2)
-            self.assertSetEqual(set([x.get_string() for x in val]), set(['abstractfoo', 'abstractbar']))
+            self.assertSetEqual(set([x.get_string() for x in val]), 
+                                set(['abstractfoo', 'abstractbar']))
             dct['count'] += 1
 
         obj.method_with_handler_async_result_set_abstract_vertx_gen(handler)
@@ -408,8 +413,9 @@ class TestAPI(unittest.TestCase):
             self.assertEqual(val[0], dict(cheese='stilton'))
             self.assertEqual(type(val[1]), dict)
             self.assertEqual(val[1], dict(socks='tartan'))
+            dct['count'] += 1
         obj.method_with_handler_list_json_object(handler)
-        self.assertEqual(dct['count'], 2)
+        self.assertEqual(dct['count'], 1)
 
 
     def testMethodWithHandlerListNullJsonObject(self):
@@ -418,6 +424,7 @@ class TestAPI(unittest.TestCase):
             self.assertEqual(type(val), list)
             self.assertEqual(len(val), 1)
             self.assertIsNone(val[0])
+            dct['count'] += 1
         obj.method_with_handler_list_null_json_object(handler)
         self.assertEqual(dct['count'], 1)
 
@@ -1475,6 +1482,6 @@ if __name__ == "__main__":
     print("Testing {}".format(meth))
     with util.handle_java_error():
         case = TestAPI(meth)
-        case()
+        case.debug()
         util.vertx_shutdown()
 

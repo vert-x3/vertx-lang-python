@@ -23,6 +23,7 @@ def handle_java_error():
     try:
         yield
     except Exception:
+        print("EXCEPT CALLING IT")
         vertx_shutdown()
         raise
 

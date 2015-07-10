@@ -52,18 +52,17 @@ public class APITest extends PythonTestBase {
   public void testObjectParam() throws Exception {
     runTest();
   }
-
-  @Test
-  public void testDataObjectParam() throws Exception {
-    runTest();
-  }
-
-  @Test
-  public void testNullDataObjectParam() throws Exception {
-    runTest();
-  }
-
-  @Test
+   @Test
+   public void testDataObjectParam() throws Exception {
+     runTest();
+   }
+ 
+   @Test
+   public void testNullDataObjectParam() throws Exception {
+     runTest();
+   }
+ 
+   @Test
   public void testMethodWithHandlerDataObject() throws Exception {
     runTest();
   }
@@ -105,8 +104,7 @@ public class APITest extends PythonTestBase {
   public void testMethodWithHandlerAsyncResultListVertxGen() throws Exception {
     runTest();
   }
-
-  @Test
+   @Test
   public void testMethodWithHandlerAsyncResultListAbstractVertxGen() throws Exception {
     runTest();
   }
@@ -125,34 +123,33 @@ public class APITest extends PythonTestBase {
   public void testMethodWithHandlerAsyncResultSetVertxGen() throws Exception {
     runTest();
   }
-  @Test
-  public void testMethodWithHandlerAsyncResultSetAbstractVertxGen() throws Exception {
-    runTest();
-  }
+   @Test
+   public void testMethodWithHandlerAsyncResultSetAbstractVertxGen() throws Exception {
+     runTest();
+   }
+ 
 
   @Test
   public void testMethodWithHandlerListJsonObject() throws Exception {
     runTest();
   }
 
+  @Test
+  public void testMethodWithHandlerListNullJsonObject() throws Exception {
+    runTest();
+  }
+
 /*
- *  @Test
- *  public void testMethodWithHandlerListNullJsonObject() throws Exception {
- *    runTest();
- *  }
- *
  *  @Test
  *  public void testMethodWithHandlerListComplexJsonObject() throws Exception {
  *    runTest();
  *  }
+ *
+ *  @Test
+ *  public void testMethodWithHandlerAsyncResultListJsonObject() throws Exception {
+ *    runTest();
+ *  }
  */
-
-  /*
-   *@Test
-   *public void testMethodWithHandlerAsyncResultListJsonObject() throws Exception {
-   *  runTest();
-   *}
-   */
 
   /*
    *@Test

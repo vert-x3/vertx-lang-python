@@ -5,6 +5,7 @@ import sys
 if sys.version_info[0] < 3:
     long = long
     basestring = basestring
+    unicode = unicode
 else:
     long = int
     basestring = str

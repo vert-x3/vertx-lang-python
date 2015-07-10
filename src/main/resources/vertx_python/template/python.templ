@@ -141,8 +141,8 @@
         } else if (kind == CLASS_JSON_ARRAY) {
 			return "util.list_to_json(" + convertName(paramName) + ")";
         } else if (kind == CLASS_DATA_OBJECT) {
-			return type.simpleName + "(util.dict_to_json(" + convertName(paramName) + ")" + 
-                   " if " + convertName(paramName) + " is not None else None)";
+			return type.simpleName + "(util.dict_to_json(" + convertName(paramName) + "))" + 
+                   " if " + convertName(paramName) + " else None";
 
         } else if (kind.basic) {
 			if (typeName == 'char' || typeName == 'java.lang.Character') {
@@ -171,7 +171,7 @@
 		} else if (kind.basic || typeName.equals("java.lang.Void")) {
 			return paramName;
 		} else {
-			return paramName + "._jdel()";
+			return paramName + "._jdel";
         }
 	}
 }
@@ -225,8 +225,8 @@
 			True
 			@comment{"len(@{convertName(param.name)}) > 0"}
 		@else{}
-			@comment{"This could possibly be smarter and do an isinstance check sometimes (not always, though)"}
-			@{convertName(param.name)} is not None
+			@comment{"Don't check anything, since None might be allowed."}
+			True
 		@end{}
 	@end{" and "}
 @end{}

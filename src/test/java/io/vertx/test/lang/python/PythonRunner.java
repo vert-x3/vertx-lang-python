@@ -32,7 +32,8 @@ public class PythonRunner {
   }
 
   public static void start_gateway() throws Exception {
-    if (gateway == null){
+    if (gateway == null) {
+      System.out.println("STARTING GATEWAY");
       boolean connected = false;
       while (!connected) {
         try {
