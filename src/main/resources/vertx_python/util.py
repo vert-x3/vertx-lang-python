@@ -1,13 +1,55 @@
 from __future__ import unicode_literals, print_function, absolute_import
 
 import json
+import collections
+import operator
+from functools import partial
 from contextlib import contextmanager
+
+from .compat import unicode, long, basestring
 
 from py4j.java_gateway import is_instance_of
 
 java_gateway = None
 jvm = None
 jvertx = None
+
+class frozendict(collections.Mapping):
+    def __init__(self, *args, **kwargs):
+        self.__dict = dict(*args, **kwargs)
+        self.__hash = None
+
+    def __getitem__(self, key):
+        return self.__dict[key]
+
+    def copy(self, **add_or_replace):
+        return frozendict(self, **add_or_replace)
+
+    def __iter__(self):
+        return iter(self.__dict)
+
+    def __len__(self):
+        return len(self.__dict)
+
+    def __repr__(self):
+        return '<frozendict %s>' % repr(self.__dict)
+
+    def __hash__(self):
+        if self.__hash is None:
+            self.__hash = reduce(operator.xor, map(hash, self.iteritems()), 0)
+        return self.__hash
+
+def parse_array(old_parse_array, *args, **kwargs):
+    values, end = old_parse_array(*args, **kwargs)
+    return frozenset(values), end
+
+class FrozenDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        super(FrozenDecoder, self).__init__(*args, **kwargs)
+        old_parse_array = self.parse_array
+        self.parse_array = partial(parse_array, old_parse_array)
+        self.scan_once = json.scanner.py_make_scanner(self)
+
 
 @contextmanager
 def handle_java_error():
@@ -23,7 +65,6 @@ def handle_java_error():
     try:
         yield
     except Exception:
-        print("EXCEPT CALLING IT")
         vertx_shutdown()
         raise
 
@@ -60,7 +101,7 @@ def vertx_init():
         except ImportError:
             raise RuntimeError("Failed to connect to Vert.x. Py4J must be on your PYTHONPATH")
 
-def convert_char(ch):
+def convert_char_to_java(ch):
     return chr(ch) if isinstance(ch, int) else ch
 
 def convert_short_to_java(x):
@@ -78,9 +119,12 @@ def convert_double_to_java(x):
 def convert_float_to_java(x):
     return jvm.java.lang.Float(x)
 
-def json_to_python(obj):
+def json_to_python(obj, hashable=False):
     """Converts a Java JSON object to Python dict or list"""
-    return json.loads(obj.encode()) if obj is not None else None
+    object_hook = frozendict if hashable else dict
+    cls = FrozenDecoder if hashable else json.JSONDecoder
+    d = json.loads(obj.encode(), object_hook=object_hook, cls=cls) if obj is not None else None
+    return d
 
 def list_to_json(obj):
     """Converts a Python list to Java JsonArray"""
@@ -100,14 +144,20 @@ def python_to_java(obj):
         return list_to_json(obj)
     return obj
 
-def data_object_to_json(obj):
-    return java_to_python(obj.toJson())
+def data_object_to_json(obj, hashable=False):
+    if obj is None:
+        return None
+    return java_to_python(obj.toJson(), hashable=hashable)
 
-def java_to_python(obj):
+def handle_none(obj, type_):
+    return type_(obj) if obj is not None else obj
+
+def java_to_python(obj, hashable=False):
     """Converts an arbitrary Java object to Python"""
     if obj is None:
         return None
-    elif is_instance_of(java_gateway, obj, jvm.io.vertx.core.json.JsonObject) or is_instance_of(java_gateway, obj, jvm.io.vertx.core.json.JsonArray):
-        return json_to_python(obj)
+    elif (is_instance_of(java_gateway, obj, jvm.io.vertx.core.json.JsonObject) or 
+          is_instance_of(java_gateway, obj, jvm.io.vertx.core.json.JsonArray)):
+        return json_to_python(obj, hashable=hashable)
     else:
         return obj

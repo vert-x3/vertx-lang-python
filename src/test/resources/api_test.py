@@ -5,11 +5,13 @@ import unittest
 from testmodel_python.testmodel.test_interface import TestInterface
 from testmodel_python.testmodel.refed_interface1 import RefedInterface1
 from testmodel_python.testmodel.refed_interface2 import RefedInterface2
+from testmodel_python.testmodel.generic_refed_interface import GenericRefedInterface
 from testmodel_python.testmodel.factory import Factory
 from acme_python.pkg.my_interface import MyInterface
 from acme_python.sub.sub_interface import SubInterface
 
 from vertx_python import util
+from vertx_python.util import frozendict
 from vertx_python.compat import long, unicode
 
 util.vertx_init()
@@ -111,12 +113,12 @@ class TestAPI(unittest.TestCase):
             self.assertIsNone(err)
             dct['count'] += 1
         def char_handler(c, err):
-            self.assertEqual(type(c), str)
+            self.assertEqual(type(c), unicode)
             self.assertEqual('X', c)
             self.assertIsNone(err)
             dct['count'] += 1
         def string_handler(s, err):
-            self.assertEqual(type(s), str)
+            self.assertEqual(type(s), unicode)
             self.assertEqual('quux!', s)
             self.assertIsNone(err)
             dct['count'] += 1
@@ -429,576 +431,756 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(dct['count'], 1)
 
 
-    #def testMethodWithHandlerListComplexJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_complex_json_object do |val|
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 1)
-          #self.equals(val[0], {'outer' => {'socks' => 'tartan'}, 'list' => ['yellow', 'blue']})
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_json_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 2)
-          #self.equals(val[0].class, Hash)
-          #self.equals(val[0], {'cheese' => 'stilton'})
-          #self.equals(val[1].class, Hash)
-          #self.equals(val[1], {'socks' => 'tartan'})
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListNullJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_null_json_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 1)
-          #self.equals(val[0], nil)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListComplexJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_complex_json_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 1)
-          #self.equals(val[0], {'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']})
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_json_object do |val|
-          #self.equals(val.class, Set)
-          #val.each { |elt| self.equals(elt.is_a?(Hash), true) }
-          #self.equals(val, Set.new([{'cheese' => 'stilton'},{'socks' => 'tartan'}]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetNullJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_null_json_object do |val|
-          #self.equals(val.class, Set)
-          #self.equals(val.size, 1)
-          #val.each { |elt| self.is_nil(elt) }
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetComplexJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_complex_json_object do |val|
-          #self.equals(val.class, Set)
-          #self.equals(val.size, 1)
-          #self.equals(val, [{'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']}].to_set)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultSetJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_json_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Set)
-          #val.each { |elt| self.equals(elt.is_a?(Hash), true) }
-          #self.equals(val, Set.new([{'cheese' => 'stilton'},{'socks' => 'tartan'}]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultSetNullJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_null_json_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Set)
-          #self.equals(val.size, 1)
-          #val.each { |elt| self.is_nil(elt) }
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultSetComplexJsonObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_complex_json_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Set)
-          #self.equals(val.size, 1)
-          #self.equals(val, [{'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']}].to_set)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerListJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_json_array do |val|
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 2)
-          #self.equals(val[0].class, Array)
-          #self.equals(val[0], %w(green blue))
-          #self.equals(val[1].class, Array)
-          #self.equals(val[1], %w(yellow purple))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerListNullJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_null_json_array do |val|
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 1)
-          #self.equals(val[0], nil)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_json_array do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 2)
-          #self.equals(val[0].class, Array)
-          #self.equals(val[0], %w(green blue))
-          #self.equals(val[1].class, Array)
-          #self.equals(val[1], %w(yellow purple))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListNullJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_null_json_array do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val.size, 1)
-          #self.equals(val[0], nil)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListComplexJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_complex_json_array do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val, [[{'foo' => 'hello'}], [{'bar' => 'bye'}]])
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_json_array do |val|
-          #self.equals(val.class, Set)
-          #val.each { |elt| self.equals(elt.is_a?(Array), true) }
-          #self.equals(val, Set.new([%w(green blue), %w(yellow purple)]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetNullJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_null_json_array do |val|
-          #self.equals(val.class, Set)
-          #self.equals(val.size, 1)
-          #val.each { |elt| self.is_nil(elt) }
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetComplexJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_complex_json_array do |val|
-          #self.equals(val.class, Set)
-          #self.equals(val, [[{'foo' => 'hello'}], [{'bar' => 'bye'}]].to_set)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultSetJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_json_array do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Set)
-          #val.each { |elt| self.equals(elt.is_a?(Array), true) }
-          #self.equals(val, Set.new([%w(green blue), %w(yellow purple)]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultSetNullJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_null_json_array do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Set)
-          #self.equals(val.size, 1)
-          #val.each { |elt| self.is_nil(elt) }
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerListComplexJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_complex_json_array do |val|
-          #self.equals(val.class, Array)
-          #self.equals(val, [[{'foo' => 'hello'}], [{'bar' => 'bye'}]])
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerListDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_data_object do |val|
-          #self.equals(val.class, Array)
-          #val.each { |elt| self.equals(elt.is_a?(Hash), true) }
-          #self.equals(val[0], {'foo'=>'String 1','bar'=>1,'wibble'=>1.1})
-          #self.equals(val[1], {'foo'=>'String 2','bar'=>2,'wibble'=>2.2})
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerListNullDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_list_null_data_object do |val|
-          #self.equals(val.class, Array)
-          #self.equals(val[0], nil)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerSetDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_data_object do |val|
-          #self.equals(val, Set.new([{'foo'=>'String 1','bar'=>1,'wibble'=>1.1},{'foo'=>'String 2','bar'=>2,'wibble'=>2.2}]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerNullSetDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_set_null_data_object do |val|
-          #self.equals(val, Set.new([nil]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultSetComplexJsonArray(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_complex_json_array do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Set)
-          #self.equals(val, [[{'foo' => 'hello'}], [{'bar' => 'bye'}]].to_set)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_data_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #val.each { |elt| self.equals(elt.is_a?(Hash), true) }
-          #self.equals(val[0], {'foo'=>'String 1','bar'=>1,'wibble'=>1.1})
-          #self.equals(val[1], {'foo'=>'String 2','bar'=>2,'wibble'=>2.2})
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultListNullDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_list_null_data_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Array)
-          #self.equals(val[0], nil)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultSetDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_data_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val, Set.new([{'foo'=>'String 1','bar'=>1,'wibble'=>1.1},{'foo'=>'String 2','bar'=>2,'wibble'=>2.2}]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultNullSetDataObject(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_set_null_data_object do |err,val|
-          #self.is_nil(err)
-          #self.equals(val, Set.new([nil]))
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultUserTypes(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_user_types do |err,val|
-          #self.is_nil(err)
-          #self.equals(val.class, Testmodel::RefedInterface1)
-          #self.equals(val.get_string, 'cheetahs')
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithConcreteHandlerUserTypeSubtype(self):
-        #dct = dict(count=0)
-        #arg = Testmodel::Factory.create_concrete_handler_user_type do |refedObj|
-          #self.equals(refedObj.class, Testmodel::RefedInterface1)
-          #self.equals(refedObj.get_string, 'echidnas')
-          #dct['count'] += 1
-        #end
-        #obj.method_with_concrete_handler_user_type_subtype arg
-        #self.equals(1, count)
-
-
-    #def testMethodWithAbstractHandlerUserTypeSubtype(self):
-        #dct = dict(count=0)
-        #arg = Testmodel::Factory.create_abstract_handler_user_type do |refedObj|
-          #self.equals(refedObj.class, Testmodel::RefedInterface1)
-          #self.equals(refedObj.get_string, 'echidnas')
-          #dct['count'] += 1
-        #end
-        #obj.method_with_abstract_handler_user_type_subtype arg
-        #self.equals(1, count)
-
-
-    #def testMethodWithConcreteHandlerUserTypeSubtypeExtension(self):
-        #dct = dict(count=0)
-        #arg = Testmodel::Factory.create_concrete_handler_user_type_extension do |refedObj|
-          #self.equals(refedObj.class, Testmodel::RefedInterface1)
-          #self.equals(refedObj.get_string, 'echidnas')
-          #dct['count'] += 1
-        #end
-        #obj.method_with_concrete_handler_user_type_subtype_extension arg
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerVoid(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_void do |val|
-          #self.is_nil(val)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultVoid(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_void(false) do |err|
-          #self.is_nil(err)
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerAsyncResultVoidFails(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_void(true) do |err|
-          #self.is_not_nil err
-          #self.equals(err.message, 'foo!')
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerThrowable(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_throwable do |err|
-          #self.is_not_nil err
-          #self.equals(err.message, 'cheese!')
-          #dct['count'] += 1
-        #end
-        #self.equals(1, count)
-
-
-    #def testMethodWithHandlerGenericUserType(self):
-        #def run_test(value, &assert)(self):
-          #dct = dict(count=0)
-          #obj.method_with_handler_generic_user_type(value) do |refedObj|
-            #self.is_not_nil(refedObj)
-            #self.equals(refedObj.class, Testmodel::GenericRefedInterface)
-            #assert.call(refedObj.get_value)
-            #dct['count'] += 1
-          #end
-          #self.equals(1, count)
-        #end
-        #run_test('string_value') { |value| self.equals(value, 'string_value') }
-        #run_test({'key' => 'key_value'}) { |value| self.equals(value, {'key' => 'key_value'}) }
-        #run_test(%w(foo bar juu)) { |value| self.equals(value, %w(foo bar juu)) }
-
-
-    #def testMethodWithHandlerAsyncResultGenericUserType(self):
-        #def run_test(value, &assert)(self):
-          #dct = dict(count=0)
-          #obj.method_with_handler_async_result_generic_user_type(value) do |err,refedObj|
-            #self.is_nil(err)
-            #self.is_not_nil(refedObj)
-            #self.equals(refedObj.class, Testmodel::GenericRefedInterface)
-            #assert.call(refedObj.get_value)
-            #dct['count'] += 1
-          #end
-          #self.equals(1, count)
-        #end
-        #run_test('string_value') { |value| self.equals(value, 'string_value') }
-        #run_test({'key' => 'key_value'}) { |value| self.equals(value, {'key' => 'key_value'}) }
-        #run_test(%w(foo bar juu)) { |value| self.equals(value, %w(foo bar juu)) }
-
-
-    #def testMethodWithGenericParam(self):
-        #obj.method_with_generic_param 'String', 'foo'
-        #obj.method_with_generic_param 'JsonObject', {'foo'=>'hello','bar'=>123}
-        #obj.method_with_generic_param 'JsonArray', ['foo', 'bar', 'wib']
-
-
-    #def testMethodWithGenericHandler(self):
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler('String') { |val| self.equals(val.class, String); Assert.equals(val, 'foo'); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler('Ref') { |val| self.equals(val.getString, 'bar'); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler('JsonObject') { |val| self.equals(val.class, Hash); Assert.equals(val, {'foo'=>'hello','bar'=>123}); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler('JsonArray') { |val| self.equals(val.class, Array); Assert.equals(val, ['foo','bar','wib']); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler('JsonObjectComplex') { |val| self.equals(val.class, Hash); Assert.equals(val, {'outer' => {'foo' => 'hello'}, 'bar'=> ['this', 'that']}); dct['count'] += 1 }
-        #self.equals(1, count)
-
-
-    #def testMethodWithGenericHandlerAsyncResult(self):
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler_async_result('String') { |err,val| self.is_nil(err); Assert.equals(val.class, String); Assert.equals(val, 'foo'); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler_async_result('Ref') { |err,val| self.is_nil(err); Assert.equals(val.getString, 'bar'); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler_async_result('JsonObject') { |err,val| self.is_nil(err); Assert.equals(val.class, Hash); Assert.equals(val, {'foo'=>'hello','bar'=>123}); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler_async_result('JsonObjectComplex') { |err,val| self.is_nil(err); Assert.equals(val.class, Hash); Assert.equals(val, {'outer' => {'foo' => 'hello'}, 'bar'=> ['this', 'that']}); dct['count'] += 1 }
-        #self.equals(1, count)
-        #dct = dict(count=0)
-        #obj.method_with_generic_handler_async_result('JsonArray') { |err,val| self.is_nil(err); Assert.equals(val.class, Array); Assert.equals(val, ['foo','bar','wib']); dct['count'] += 1 }
-        #self.equals(1, count)
-
-
-    #def testBasicReturns(self):
-        #ret = obj.method_with_byte_return
-        #self.equals(ret.class, Fixnum)
-        #self.equals(ret, 123)
-        #ret = obj.method_with_short_return
-        #self.equals(ret.class, Fixnum)
-        #self.equals(ret, 12345)
-        #ret = obj.method_with_int_return
-        #self.equals(ret.class, Fixnum)
-        #self.equals(ret, 12345464)
-        #ret = obj.method_with_long_return
-        #self.equals(ret.class, Fixnum)
-        #self.equals(ret, 65675123)
-        #ret = obj.method_with_float_return
-        #self.equals(ret.class, Float)
-        #self.equals(ret, 1.23)
-        #ret = obj.method_with_double_return
-        #self.equals(ret.class, Float)
-        #self.equals(ret, 3.34535)
-        #ret = obj.method_with_boolean_return?
-        #self.equals(ret.class, TrueClass)
-        #self.equals(ret, true)
-        #ret = obj.method_with_char_return
-        #self.equals(ret.class, Fixnum)
-        #self.equals(ret, 89)
-        #ret = obj.method_with_string_return
-        #self.equals(ret.class, String)
-        #self.equals(ret, 'orangutan')
-
-
-    #def testVertxGenReturn(self):
-        #ret = obj.method_with_vertx_gen_return
-        #self.equals(ret.class, Testmodel::RefedInterface1)
-        #self.equals(ret.get_string, 'chaffinch')
-
-
-    #def testVertxGenNullReturn(self):
-        #ret = obj.method_with_vertx_gen_null_return
-        #self.equals(nil, ret)
-
-
-    #def testAbstractVertxGenReturn(self):
-        #ret = obj.method_with_abstract_vertx_gen_return
-        #self.equals(ret.is_a?(Testmodel::RefedInterface2), true)
-        #self.equals(ret.get_string, 'abstractchaffinch')
+    def testMethodWithHandlerListComplexJsonObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 1)
+            self.assertEqual(val[0], {'outer' : {'socks' : 'tartan'}, 'list' : ['yellow', 'blue']})
+            dct['count'] += 1
+        obj.method_with_handler_list_complex_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListJsonObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 2)
+            self.assertEqual(type(val[0]), dict)
+            self.assertEqual(val[0], dict(cheese='stilton'))
+            self.assertEqual(type(val[1]), dict)
+            self.assertEqual(val[1], dict(socks='tartan'))
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListNullJsonObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 1)
+            self.assertIsNone(val[0])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_null_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListComplexJsonObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 1)
+            self.assertEqual(val[0], {'outer' : {'socks' : 'tartan'}, 
+                                      'list' : ['yellow', 'blue']})
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_complex_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetJsonObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), set)
+            for elt in val:
+                self.assertEqual(type(elt), frozendict)
+            self.assertEqual(val, set([frozendict(cheese='stilton'), 
+                                       frozendict(socks='tartan')]))
+            dct['count'] += 1
+        obj.method_with_handler_set_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetNullJsonObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), set)
+            self.assertEqual(len(val), 1)
+            for elt in val:
+                self.assertIsNone(None)
+            dct['count'] += 1
+        obj.method_with_handler_set_null_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetComplexJsonObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), set)
+            self.assertEqual(len(val), 1)
+            self.assertEqual(val, set([frozendict({'outer' : frozendict({'socks' : 'tartan'}),
+                                                   'list' : frozenset(['yellow', 'blue'])})
+                                     ])
+                            )
+            dct['count'] += 1
+        obj.method_with_handler_set_complex_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetJsonObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), set)
+            for elt in val:
+                self.assertEqual(type(elt), frozendict)
+            self.assertEqual(val, set([frozendict(cheese='stilton'), 
+                                       frozendict(socks='tartan')]))
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetNullJsonObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), set)
+            self.assertEqual(len(val), 1)
+            for elt in val:
+                self.assertIsNone(None)
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_null_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetComplexJsonObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), set)
+            self.assertEqual(len(val), 1)
+            self.assertEqual(val, set([frozendict({'outer' : frozendict({'socks' : 'tartan'}),
+                                                   'list' : frozenset(['yellow', 'blue'])})
+                                     ])
+                            )
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_complex_json_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerListJsonArray(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 2)
+            self.assertEqual(type(val[0]), list)
+            self.assertEqual(val[0], ['green', 'blue'])
+            self.assertEqual(type(val[1]), list)
+            self.assertEqual(val[1], ['yellow', 'purple'])
+            dct['count'] += 1
+        obj.method_with_handler_list_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerListNullJsonArray(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 1)
+            self.assertIsNone(val[0])
+            dct['count'] += 1
+        obj.method_with_handler_list_null_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListJsonArray(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 2)
+            self.assertEqual(type(val[0]), list)
+            self.assertEqual(val[0], ['green', 'blue'])
+            self.assertEqual(type(val[1]), list)
+            self.assertEqual(val[1], ['yellow', 'purple'])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListNullJsonArray(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(len(val), 1)
+            self.assertIsNone(val[0])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_null_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListComplexJsonArray(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(val, [[{'foo' : 'hello'}], [{'bar' : 'bye'}]])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_complex_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetJsonArray(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), set)
+            for elt in val:
+                self.assertEqual(type(elt), frozenset)
+            self.assertEqual(val, set([frozenset(['green', 'blue']),
+                                       frozenset(['yellow', 'purple'])]))
+            dct['count'] += 1
+        obj.method_with_handler_set_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetNullJsonArray(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), set)
+            self.assertEqual(len(val), 1)
+            for elt in val:
+                self.assertIsNone(elt)
+            dct['count'] += 1
+        obj.method_with_handler_set_null_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetComplexJsonArray(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), set)
+            self.assertEqual(val, set([frozenset([frozendict({'foo' : 'hello'})]), 
+                                       frozenset([frozendict({'bar' : 'bye'})])
+                                     ])
+                            )
+            dct['count'] += 1
+        obj.method_with_handler_set_complex_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetJsonArray(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), set)
+            for elt in val:
+                self.assertEqual(type(elt), frozenset)
+            self.assertEqual(val, set([frozenset(['purple', 'yellow']), 
+                                       frozenset(['blue', 'green'])
+                                     ])
+                            )
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetNullJsonArray(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), set)
+            self.assertEqual(len(val), 1)
+            for elt in val:
+                self.assertIsNone(elt)
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_null_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerListComplexJsonArray(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            self.assertEqual(val, [[{'foo' : 'hello'}], [{'bar' : 'bye'}]])
+            dct['count'] += 1
+        obj.method_with_handler_list_complex_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetComplexJsonArray(self):
+        dct = dict(count=0)
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), set)
+            self.assertEqual(val, set([frozenset([frozendict({'foo' : 'hello'})]), 
+                                       frozenset([frozendict({'bar' : 'bye'})])
+                                     ])
+                            )
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_complex_json_array(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerListDataObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            for elt in val:
+                self.assertEqual(type(elt), dict)
+            self.assertEqual(val[0], {'foo' : 'String 1', 'bar' : 1, 'wibble' : 1.1})
+            self.assertEqual(val[1], {'foo' : 'String 2', 'bar' : 2, 'wibble' : 2.2})
+            dct['count'] += 1
+        obj.method_with_handler_list_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerListNullDataObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(type(val), list)
+            self.assertIsNone(val[0])
+            dct['count'] += 1
+        obj.method_with_handler_list_null_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetDataObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(val, set([frozendict({'foo' : 'String 1', 'bar' : 1, 'wibble' : 1.1}),
+                                       frozendict({'foo' : 'String 2', 'bar' : 2, 'wibble' : 2.2})
+                                      ])
+                            )
+            dct['count'] += 1
+        obj.method_with_handler_set_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerSetNullDataObject(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertEqual(val, set([None]))
+            dct['count'] += 1
+        obj.method_with_handler_set_null_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListDataObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            for elt in val:
+                self.assertEqual(type(elt), dict)
+            self.assertEqual(val[0], {'foo' : 'String 1', 'bar' : 1, 'wibble' : 1.1})
+            self.assertEqual(val[1], {'foo' : 'String 2', 'bar' : 2, 'wibble' : 2.2})
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultListNullDataObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val, [None])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_list_null_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetDataObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val, set([frozendict({'foo' : 'String 1', 'bar' : 1, 'wibble' : 1.1}),
+                                       frozendict({'foo' : 'String 2', 'bar' : 2, 'wibble' : 2.2})
+                                      ])
+                            )
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultSetNullDataObject(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val, set([None]))
+            dct['count'] += 1
+        obj.method_with_handler_async_result_set_null_data_object(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultUserTypes(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), RefedInterface1)
+            self.assertEqual(val.get_string(), 'cheetahs')
+            dct['count'] += 1
+        obj.method_with_handler_async_result_user_types(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithConcreteHandlerUserTypeSubtype(self):
+        dct = dict(count=0)
+        def handler(obj):
+            self.assertEqual(type(obj), RefedInterface1)
+            self.assertEqual(obj.get_string(), 'echidnas')
+            dct['count'] += 1
+        arg = Factory.create_concrete_handler_user_type(handler)
+        obj.method_with_concrete_handler_user_type_subtype(arg)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithAbstractHandlerUserTypeSubtype(self):
+        dct = dict(count=0)
+        def handler(obj):
+            self.assertEqual(type(obj), RefedInterface1)
+            self.assertEqual(obj.get_string(), 'echidnas')
+            dct['count'] += 1
+        arg = Factory.create_abstract_handler_user_type(handler)
+        obj.method_with_abstract_handler_user_type_subtype(arg)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithConcreteHandlerUserTypeSubtypeExtension(self):
+        dct = dict(count=0)
+        def handler(obj):
+            self.assertEqual(type(obj), RefedInterface1)
+            self.assertEqual(obj.get_string(), 'echidnas')
+            dct['count'] += 1
+        arg = Factory.create_concrete_handler_user_type_extension(handler)
+        obj.method_with_concrete_handler_user_type_subtype_extension(arg)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerVoid(self):
+        dct = dict(count=0)
+        def handler(val):
+            self.assertIsNone(val)
+            dct['count'] += 1
+        obj.method_with_handler_void(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultVoid(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(err)
+            self.assertIsNone(val)
+            dct['count'] += 1
+        obj.method_with_handler_async_result_void(False, handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerAsyncResultVoidFails(self):
+        dct = dict(count=0)
+        def handler(val, err):
+            self.assertIsNone(val)
+            self.assertEqual(err.getMessage(), 'foo!')
+            dct['count'] += 1
+        obj.method_with_handler_async_result_void(True, handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerThrowable(self):
+        dct = dict(count=0)
+        def handler(err):
+            self.assertEqual(err.getMessage(), 'cheese!')
+            dct['count'] += 1
+        obj.method_with_handler_throwable(handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithHandlerGenericUserType(self):
+        def run_test(value, assertion):
+            dct = dict(count=0)
+            def handler(obj):
+                self.assertIsNotNone(obj)
+                self.assertEqual(type(obj), GenericRefedInterface)
+                assertion(obj.get_value())
+                dct['count'] += 1
+            obj.method_with_handler_generic_user_type(value, handler)
+            self.assertEqual(dct['count'], 1)
+        run_test('string_value', lambda x: self.assertEqual(x, 'string_value'))
+        run_test({'key' : 'key_value'}, lambda x: self.assertEqual(x, {'key' : 'key_value'}))
+        run_test(['foo', 'bar', 'juu'], lambda x: self.assertEqual(x, ['foo', 'bar', 'juu']))
+
+
+    def testMethodWithHandlerAsyncResultGenericUserType(self):
+        def run_test(value, assertion):
+            dct = dict(count=0)
+            def handler(obj, err):
+                self.assertIsNone(err)
+                self.assertIsNotNone(obj)
+                self.assertEqual(type(obj), GenericRefedInterface)
+                assertion(obj.get_value())
+                dct['count'] += 1
+            obj.method_with_handler_async_result_generic_user_type(value, handler)
+            self.assertEqual(dct['count'], 1)
+        run_test('string_value', lambda x: self.assertEqual(x, 'string_value'))
+        run_test({'key' : 'key_value'}, lambda x: self.assertEqual(x, {'key' : 'key_value'}))
+        run_test(['foo', 'bar', 'juu'], lambda x: self.assertEqual(x, ['foo', 'bar', 'juu']))
+
+
+    def testMethodWithGenericParam(self):
+        obj.method_with_generic_param('String', 'foo')
+        obj.method_with_generic_param('JsonObject', {'foo' : 'hello','bar' : 123})
+        obj.method_with_generic_param('JsonArray', ['foo', 'bar', 'wib'])
+
+
+    def testMethodWithGenericHandler(self):
+        dct = dict(count=0)
+        def str_handler(val):
+            self.assertEqual(type(val), unicode)
+            self.assertEqual(val, 'foo')
+            dct['count'] += 1
+        obj.method_with_generic_handler('String', str_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def do_handler(val):
+            self.assertEqual(val.getString(), 'bar')
+            dct['count'] += 1
+        obj.method_with_generic_handler('Ref', do_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def json_obj_handler(val):
+            self.assertEqual(type(val), dict)
+            self.assertEqual(val, {'foo' : 'hello', 'bar' : 123})
+            dct['count'] += 1
+        obj.method_with_generic_handler('JsonObject', json_obj_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def json_arr_handler(val):
+            self.assertEqual(type(val), list)
+            self.assertEqual(val, ['foo', 'bar', 'wib'])
+            dct['count'] += 1
+        obj.method_with_generic_handler('JsonArray', json_arr_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def json_obj_complex_handler(val):
+            self.assertEqual(type(val), dict)
+            self.assertEqual(val, {'outer' : {'foo' : 'hello'}, 
+                                   'bar' : ['this', 'that']})
+            dct['count'] += 1
+        obj.method_with_generic_handler('JsonObjectComplex', json_obj_complex_handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testMethodWithGenericHandlerAsyncResult(self):
+        dct = dict(count=0)
+        def str_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), unicode)
+            self.assertEqual(val, 'foo')
+            dct['count'] += 1
+        obj.method_with_generic_handler_async_result('String', str_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def do_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val.getString(), 'bar')
+            dct['count'] += 1
+        obj.method_with_generic_handler_async_result('Ref', do_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def json_obj_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), dict)
+            self.assertEqual(val, {'foo' : 'hello', 'bar' : 123})
+            dct['count'] += 1
+        obj.method_with_generic_handler_async_result('JsonObject', json_obj_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def json_arr_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), list)
+            self.assertEqual(val, ['foo', 'bar', 'wib'])
+            dct['count'] += 1
+        obj.method_with_generic_handler_async_result('JsonArray', json_arr_handler)
+        self.assertEqual(dct['count'], 1)
+
+        dct = dict(count=0)
+        def json_obj_complex_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(type(val), dict)
+            self.assertEqual(val, {'outer' : {'foo' : 'hello'}, 
+                                   'bar' : ['this', 'that']})
+            dct['count'] += 1
+        obj.method_with_generic_handler_async_result('JsonObjectComplex', json_obj_complex_handler)
+        self.assertEqual(dct['count'], 1)
+
+
+    def testJsonParams(self):
+        obj.method_with_json_params({'cat' : 'lion', 'cheese' : 'cheddar'}, 
+                                    ['house', 'spider'])
+
+
+    def testNullJsonParams(self):
+        self.assertRaises(TypeError, obj.method_with_null_json_params, None, None)
+
+
+    def testJsonHandlerParams(self):
+        dct = dict(count=0)
+        def obj_handler(val):
+            self.assertEqual(val, {'cheese' : 'stilton'})
+            dct['count'] += 1
+        def arr_handler(val):
+            self.assertEqual(val, ['socks', 'shoes'])
+            dct['count'] += 1
+        obj.method_with_handler_json(obj_handler, arr_handler)
+        self.assertEqual(dct['count'], 2)
+
+
+    def testNullJsonHandlerParams(self):
+        dct = dict(count=0)
+        def obj_handler(val):
+            self.assertIsNone(val)
+            dct['count'] += 1
+        def arr_handler(val):
+            self.assertIsNone(val)
+            dct['count'] += 1
+        obj.method_with_handler_null_json(obj_handler, arr_handler)
+        self.assertEqual(dct['count'], 2)
+
+
+    def testComplexJsonHandlerParams(self):
+        dct = dict(count=0)
+        def obj_handler(val):
+            self.assertEqual(val, {'outer' : {'socks' : 'tartan'},
+                                   'list' : ['yellow', 'blue']})
+            dct['count'] += 1
+        def arr_handler(val):
+            self.assertEqual(val, [[{'foo' : 'hello'}], [{'bar' : 'bye'}]])
+            dct['count'] += 1
+        obj.method_with_handler_complex_json(obj_handler, arr_handler)
+        self.assertEqual(dct['count'], 2)
+
+
+    def testJsonHandlerAsyncResultParams(self):
+        dct = dict(count=0)
+        def obj_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val, {'cheese' : 'stilton'})
+            dct['count'] += 1
+        def arr_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val, ['socks', 'shoes'])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_json_object(obj_handler)
+        obj.method_with_handler_async_result_json_array(arr_handler)
+        self.assertEqual(dct['count'], 2)
+
+
+    def testNullJsonHandlerAsyncResultParams(self):
+        dct = dict(count=0)
+        def obj_handler(val, err):
+            self.assertIsNone(val)
+            self.assertIsNone(err)
+            dct['count'] += 1
+        def arr_handler(val, err):
+            self.assertIsNone(val)
+            self.assertIsNone(err)
+            dct['count'] += 1
+
+        obj.method_with_handler_async_result_null_json_object(obj_handler)
+        obj.method_with_handler_async_result_null_json_array(arr_handler)
+        self.assertEqual(dct['count'], 2)
+
+
+    def testComplexJsonHandlerAsyncResultParams(self):
+        dct = dict(count=0)
+        def obj_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val, {'outer' : {'socks' : 'tartan'},
+                                   'list' : ['yellow', 'blue']})
+            dct['count'] += 1
+        def arr_handler(val, err):
+            self.assertIsNone(err)
+            self.assertEqual(val, [{'foo' : 'hello'}, {'bar' : 'bye'}])
+            dct['count'] += 1
+        obj.method_with_handler_async_result_complex_json_object(obj_handler)
+        obj.method_with_handler_async_result_complex_json_array(arr_handler)
+        self.assertEqual(dct['count'], 2)
+
+
+    def testBasicReturns(self):
+        ret = obj.method_with_byte_return()
+        self.assertEqual(type(ret), int)
+        self.assertEqual(ret, 123)
+        ret = obj.method_with_short_return()
+        self.assertEqual(type(ret), int)
+        self.assertEqual(ret, 12345)
+        ret = obj.method_with_int_return()
+        self.assertEqual(type(ret), int)
+        self.assertEqual(ret, 12345464)
+        ret = obj.method_with_long_return()
+        self.assertEqual(type(ret), long)
+        self.assertEqual(ret, 65675123)
+        ret = obj.method_with_float_return()
+        self.assertEqual(type(ret), float)
+        self.assertEqual(ret, 1.23)
+        ret = obj.method_with_double_return()
+        self.assertEqual(type(ret), float)
+        self.assertEqual(ret, 3.34535)
+        ret = obj.method_with_boolean_return()
+        self.assertEqual(type(ret), bool)
+        self.assertEqual(ret, True)
+        ret = obj.method_with_char_return()
+        self.assertEqual(type(ret), unicode)
+        self.assertEqual(ret, 'Y')
+        ret = obj.method_with_string_return()
+        self.assertEqual(type(ret), unicode)
+        self.assertEqual(ret, 'orangutan')
+
+
+    def testVertxGenReturn(self):
+        ret = obj.method_with_vertx_gen_return()
+        self.assertEqual(type(ret), RefedInterface1)
+        self.assertEqual(ret.get_string(), 'chaffinch')
+
+
+    def testVertxGenNullReturn(self):
+        ret = obj.method_with_vertx_gen_null_return()
+        self.assertIsNone(ret)
+
+
+    def testAbstractVertxGenReturn(self):
+        ret = obj.method_with_abstract_vertx_gen_return()
+        self.assertIsInstance(ret, RefedInterface2)
+        self.assertEqual(ret.get_string(), 'abstractchaffinch')
 
 
     #def testMapComplexJsonArrayReturn(self):
-        #map = obj.method_with_map_complex_json_array_return {}
-        #m = map['foo']
-        #self.equals m, [{'foo' => 'hello'}, {'bar' => 'bye'}]
+        #def handler(map):
+            #m = map['foo']
+            #self.assertEqual(m, [{'foo' : 'hello'}, {'bar' : 'bye'}])
+        #obj.method_with_map_complex_json_array_return(handler)
 
 
     #def testOverloadedMethods(self):
         #@refed_obj.set_string('dog')
         #called = false
         #ret = obj.overloaded_method('cat', @refed_obj)
-        #self.equals(ret, 'meth1')
-        #ret = obj.overloaded_method('cat', @refed_obj, 12345) { |animal| self.equals(animal, 'giraffe') ; called = true }
-        #self.equals(ret, 'meth2')
-        #self.equals(called, true)
+        #self.assertEqual(ret, 'meth1')
+        #ret = obj.overloaded_method('cat', @refed_obj, 12345) { |animal| self.assertEqual(animal, 'giraffe') ; called = true }
+        #self.assertEqual(ret, 'meth2')
+        #self.assertEqual(called, true)
         #called = false
         ## for some reason animal is sometimes equals to giraffe and sometimes empty
         #ret = obj.overloaded_method('cat') { |animal| called = true }
-        #self.equals(ret, 'meth3')
-        #self.equals(called, true)
+        #self.assertEqual(ret, 'meth3')
+        #self.assertEqual(called, true)
         #called = false
-        #ret = obj.overloaded_method('cat', @refed_obj) { |animal| self.equals(animal, 'giraffe') ; called = true }
-        #self.equals(ret, 'meth4')
-        #self.equals(called, true)
+        #ret = obj.overloaded_method('cat', @refed_obj) { |animal| self.assertEqual(animal, 'giraffe') ; called = true }
+        #self.assertEqual(ret, 'meth4')
+        #self.assertEqual(called, true)
         #self.argument_error { obj.overloaded_method 'cat' }
         #self.argument_error { obj.overloaded_method('cat', @refed_obj, 12345) }
         #self.argument_error { obj.overloaded_method {} }
@@ -1006,29 +1188,29 @@ class TestAPI(unittest.TestCase):
 
     #def testSuperInterfaces(self):
         #obj.super_method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, true, 88, 'foobar')
-        #self.equals(obj.is_a?(Testmodel::SuperInterface1), true)
+        #self.assertEqual(obj.is_a?(Testmodel::SuperInterface1), true)
         #obj.other_super_method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, true, 88, 'foobar')
-        #self.equals(obj.is_a?(Testmodel::SuperInterface2), true)
+        #self.assertEqual(obj.is_a?(Testmodel::SuperInterface2), true)
 
 
     #def testMethodWithGenericReturn(self):
         #ret = obj.method_with_generic_return('JsonObject')
-        #self.equals(ret.class, Hash)
-        #self.equals(ret, {'foo'=>'hello','bar'=>123})
+        #self.assertEqual(ret.class, Hash)
+        #self.assertEqual(ret, {'foo'=>'hello','bar'=>123})
         #ret = obj.method_with_generic_return('JsonArray')
-        #self.equals(ret.class, Array)
-        #self.equals(ret, %w(foo bar wib))
+        #self.assertEqual(ret.class, Array)
+        #self.assertEqual(ret, %w(foo bar wib))
 
 
     #def testFluentMethod(self):
         #ret = obj.fluent_method('bar')
-        #self.equals(ret, obj)
+        #self.assertEqual(ret, obj)
 
 
     #def testStaticFactoryMethod(self):
         #ret = Testmodel::TestInterface.static_factory_method('bar')
-        #self.equals(ret.class, Testmodel::RefedInterface1)
-        #self.equals(ret.get_string, 'bar')
+        #self.assertEqual(ret.class, Testmodel::RefedInterface1)
+        #self.assertEqual(ret.get_string, 'bar')
 
 
     #def testMethodWithCachedReturn(self):
@@ -1047,9 +1229,9 @@ class TestAPI(unittest.TestCase):
 
     #def testJsonReturns(self):
         #ret = obj.method_with_json_object_return
-        #self.equals(ret, {'cheese'=>'stilton'})
+        #self.assertEqual(ret, {'cheese'=>'stilton'})
         #ret = obj.method_with_json_array_return
-        #self.equals(ret, %w(socks shoes))
+        #self.assertEqual(ret, %w(socks shoes))
 
 
     #def testNullJsonReturns(self):
@@ -1066,64 +1248,9 @@ class TestAPI(unittest.TestCase):
         #self.equals ret, [{'foo' => 'hello'}, {'bar' => 'bye'}]
 
 
-    #def testJsonParams(self):
-        #obj.method_with_json_params({'cat' => 'lion', 'cheese' => 'cheddar'}, %w(house spider))
-
-
-    #def testNullJsonParams(self):
-        #self.argument_error { obj.method_with_null_json_params(nil, nil) }
-
-
-    #def testJsonHandlerParams(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_json(
-            #Proc.new { |val| self.equals(val, {'cheese'=>'stilton'}); dct['count'] += 1 }) do  |val|
-          #self.equals(val, %w(socks shoes)); dct['count'] += 1
-        #end
-        #self.equals(2, count)
-
-
-    #def testNullJsonHandlerParams(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_null_json(
-            #Proc.new { |val| self.is_nil(val); dct['count'] += 1 }) do |val|
-          #self.is_nil(val); dct['count'] += 1
-        #end
-        #self.equals(2, count)
-
-
-    #def testComplexJsonHandlerParams(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_complex_json(
-            #Proc.new { |val| self.equals(val, {'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']}); dct['count'] += 1 }) do |val|
-          #self.equals(val, [[{'foo' => 'hello'}], [{'bar' => 'bye'}]])
-          #dct['count'] += 1
-        #end
-        #self.equals(2, count)
-
-
-    #def testJsonHandlerAsyncResultParams(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_json_object { |err,val| self.is_nil(err); Assert.equals(val, {'cheese'=>'stilton'}); dct['count'] += 1 }
-        #obj.method_with_handler_async_result_json_array { |err,val| self.is_nil(err); Assert.equals(val, ['socks','shoes']); dct['count'] += 1 }
-        #self.equals(2, count)
-
-
-    #def testNullJsonHandlerAsyncResultParams(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_null_json_object { |err,val| self.is_nil(err); Assert.is_nil(val); dct['count'] += 1 }
-        #obj.method_with_handler_async_result_null_json_array { |err,val| self.is_nil(err); Assert.is_nil(val); dct['count'] += 1 }
-        #self.equals(2, count)
-
-
-    #def testEnumParam(self):
-        #ret = obj.method_with_enum_param('sausages', :TIM)
-        #self.equals(ret, 'sausagesTIM')
-
-
     #def testEnumReturn(self):
         #ret = obj.method_with_enum_return('JULIEN')
-        #self.equals(:JULIEN, ret)
+        #self.assertEqual(:JULIEN, ret)
 
 
     #def testMapReturn(self):
@@ -1401,27 +1528,12 @@ class TestAPI(unittest.TestCase):
         #ret = obj.method_with_set_vertx_gen_return
         #self.has_class ret, Set
         #ret.each { |elt| self.has_class(elt, Testmodel::RefedInterface1) }
-        #self.equals(ret.map { |o| o.get_string }.to_set, Set.new(%w(foo bar)))
-
-
-    #def testComplexJsonHandlerAsyncResultParams(self):
-        #dct = dict(count=0)
-        #obj.method_with_handler_async_result_complex_json_object { |err,val|
-          #self.is_nil(err)
-          #self.equals(val, {'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']})
-          #dct['count'] += 1
-        #}
-        #obj.method_with_handler_async_result_complex_json_array { |err,val|
-          #self.is_nil(err)
-          #self.equals(val, [{'foo' => 'hello'}, {'bar' => 'bye'}])
-          #dct['count'] += 1
-        #}
-        #self.equals(2, count)
+        #self.assertEqual(ret.map { |o| o.get_string }.to_set, Set.new(%w(foo bar)))
 
 
     #def testThrowableReturn(self):
         #ret = obj.method_with_throwable_return 'bogies'
-        #self.equals('bogies', ret.message)
+        #self.assertEqual('bogies', ret.message)
 
 
     #def testCustomModule(self):
@@ -1475,6 +1587,11 @@ class TestAPI(unittest.TestCase):
             #{'foo'=>Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('foo'),'eek'=>Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('bar')}
         #)
         #self.argument_error { obj.method_with_list_params(nil, nil, nil, nil, nil, nil, nil, nil) }
+
+
+    #def testEnumParam(self):
+        #ret = obj.method_with_enum_param('sausages', :TIM)
+        #self.assertEqual(ret, 'sausagesTIM')
 
 
 if __name__ == "__main__":

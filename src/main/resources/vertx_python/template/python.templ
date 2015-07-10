@@ -41,7 +41,7 @@
 	def genMethodCall(method) {
 		out = "";
 		if (static) {
-			out += "util.jvm" + ifacePackageName + "." + ifaceSimpleName;
+			out += "util.jvm." + ifacePackageName + "." + ifaceSimpleName;
 		} else {
 			out += "self.j" + ifaceName;
 		}
@@ -57,30 +57,44 @@
 		return out;	
 	}
 
+	def boolToStr(b) {
+		return (b) ? "True" : "False";
+    }
+
 	/*
      * Generate the code that converts a Java return to the corresponding Python value.
      * This is also used for converting values returned from Java API via handlers.
      */
-	def convReturn(type, expr) {
+	def convReturn(type, expr, hashable) {
 		var kind = type.kind;
 		if (kind == CLASS_LIST) {
 			var elementType = type.args[0];
-			return "[" + convReturn(elementType, "elt") + " for elt in " + expr + "]";
+			if (hashable) {
+				listtype = "set";
+			} else {
+				listtype = "list";
+			}
+			return listtype + "([" + convReturn(elementType, "elt", hashable) + " for elt in " + expr + "])";
 		} else if (kind == CLASS_SET) {
 			var elementType = type.args[0];
-			return "set([" + convReturn(elementType, "elt") + " for elt in " + expr + "])";
+			if (hashable) {
+				settype = "frozenset";
+			} else {
+				settype = "set";
+			}
+			return settype + "([" + convReturn(elementType, "elt", true) + " for elt in " + expr + "])";
 		} else if (kind == CLASS_JSON_OBJECT) {
-			return "util.java_to_python(" + expr + ")";
+			return "util.java_to_python(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 		} else if (kind == CLASS_JSON_ARRAY) {
-			return "util.java_to_python(" + expr + ")";
+			return "util.java_to_python(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 		} else if (kind == CLASS_DATA_OBJECT) {
-			return "util.data_object_to_json(" + expr + ")";
+			return "util.data_object_to_json(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 		} else if (kind == CLASS_API) {
 			if (type.raw != null) {
 				if (type.raw.simpleName.equals("Throwable")) {
 					return "util.java_to_python(" + expr + ")";
 				} else {
-					return type.raw.simpleName + "(" + expr + ")";
+					return "util.handle_none(" + expr + ", " + type.raw.simpleName + ")";
 				}
 			} else {
 				return "util.java_to_python(" + expr ")";
@@ -103,7 +117,7 @@
 				return expr;
 			}
 		}
-		return "util.java_to_python(" + expr + ")";
+		return "util.java_to_python(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 	}
 
 	/*
@@ -146,7 +160,7 @@
 
         } else if (kind.basic) {
 			if (typeName == 'char' || typeName == 'java.lang.Character') {
-				return "util.convert_char(" + convertName(paramName) + ")";
+				return "util.convert_char_to_java(" + convertName(paramName) + ")";
 			} else if (typeName == 'long' || typeName == 'java.lang.Long') {
 				return "util.convert_long_to_java(" + convertName(paramName) + ")";
 			} else if (typeName == 'byte' || typeName == 'java.lang.Byte') {
@@ -216,7 +230,7 @@
 		@else{param.type.kind == CLASS_STRING}
 			@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, basestring)
 		@else{param.type.kind == CLASS_JSON_OBJECT}
-	    	@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, dict)
+			@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, dict)
 		@else{param.type.kind == CLASS_JSON_ARRAY}
 			@{convertName(param.name)} is not None and isinstance(@{convertName(param.name)}, (list, tuple))
 		@else{param.type.kind == CLASS_HANDLER}
@@ -327,7 +341,7 @@
 				@if{baseMethod.fluent}
 					@{ind}        @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
+					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod), false)}\n
 				@end{}
 				@{ind}    else:\n
 				@{ind}        raise TypeError("Invalid arguments for @{convertName(methodName)}")\n
@@ -335,7 +349,7 @@
 				@if{baseMethod.fluent}
 					@{ind}    @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}    return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
+					@{ind}    return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod), false)}\n
 				@end{}
 			@end{}
 		@else{}
@@ -345,7 +359,7 @@
 				@if{method.fluent}
 					@{ind}        @{genMethodCall(method)}\n
 				@else{}
-					@{ind}        return @{convReturn(method.returnType, genMethodCall(method))}\n
+					@{ind}        return @{convReturn(method.returnType, genMethodCall(method), false)}\n
 				@end{}
 			@end{}
 			@if{requiresTypeCheck([baseMethod])}
@@ -353,7 +367,7 @@
 				@if{baseMethod.fluent}
 					@{ind}        @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
+					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod), false)}\n
 				@end{}
 				@{ind}    else:\n
 				@{ind}        raise TypeError("Invalid arguments for @{convertName(methodName)}")\n
@@ -362,7 +376,7 @@
 				@if{baseMethod.fluent}
 					@{ind}        @{genMethodCall(baseMethod)}\n
 				@else{}
-					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod))}\n
+					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod), false)}\n
 				@end{}
 			@end{}
 			@if{baseMethod.fluent}
@@ -403,7 +417,7 @@
 								@if{param.type.args[0].args[0].name.startsWith('java.lang.Void')}
 						                self.handler(None, None)\n
 								@else{}
-						                self.handler(@{convReturn(param.type.args[0].args[0], "result.result()")}, None)\n
+						                self.handler(@{convReturn(param.type.args[0].args[0], "result.result()", false)}, None)\n
 								@end{}
 						            else:\n
 						                self.handler(None, result.cause())\n
@@ -411,7 +425,7 @@
 								@if{param.type.args[0].name.startsWith('java.lang.Void')}
 						            self.handler(None)\n
 								@else{}
-						            self.handler(@{convReturn(param.type.args[0], "result")})\n
+						            self.handler(@{convReturn(param.type.args[0], "result", false)})\n
 								@end{}
 							@end{}
 						        except Exception:\n

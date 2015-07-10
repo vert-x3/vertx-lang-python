@@ -19,10 +19,7 @@ public abstract class PythonTestBase {
 
   protected void runTest() throws Exception {
     PythonRunner runner = new PythonRunner();
-    PythonRunner.start_gateway();
-    try {
-      TimeUnit.MILLISECONDS.sleep(2000);
-    } catch (InterruptedException ex) { }
+    runner.start_gateway();
     String path = "src/test/resources/" + getTestFile();
     int out = runner.run(path, getMethodName());
     Assert.assertEquals("Test return value indicates failure", out, 0);

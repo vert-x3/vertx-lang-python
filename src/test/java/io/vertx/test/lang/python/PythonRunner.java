@@ -15,13 +15,9 @@ import py4j.GatewayServer;
  */
 public class PythonRunner {
 
-  private static GatewayServer gateway;
-  private static int port = 25333;
-  private static int client_port = 24333;
-  /*
-   *private int port;
-   *private int client_port;
-   */
+  private GatewayServer gateway;
+  private int port = 25333;
+  private int client_port = 24333;
   private Process Process;
 
   public static void main(String[] args) {
@@ -31,9 +27,8 @@ public class PythonRunner {
     return Vertx.vertx();
   }
 
-  public static void start_gateway() throws Exception {
+  public void start_gateway() throws Exception {
     if (gateway == null) {
-      System.out.println("STARTING GATEWAY");
       boolean connected = false;
       while (!connected) {
         try {
@@ -71,10 +66,8 @@ public class PythonRunner {
     pb.redirectError(Redirect.INHERIT);
     Process process = pb.start();
     int out = process.waitFor();
-    /*
-     *gateway.shutdown();
-     *gateway = null;
-     */
+    gateway.shutdown();
+    gateway = null;
     return out;
       
   }

@@ -123,12 +123,12 @@ public class APITest extends PythonTestBase {
   public void testMethodWithHandlerAsyncResultSetVertxGen() throws Exception {
     runTest();
   }
-   @Test
-   public void testMethodWithHandlerAsyncResultSetAbstractVertxGen() throws Exception {
-     runTest();
-   }
- 
 
+  @Test
+  public void testMethodWithHandlerAsyncResultSetAbstractVertxGen() throws Exception {
+    runTest();
+  }
+ 
   @Test
   public void testMethodWithHandlerListJsonObject() throws Exception {
     runTest();
@@ -139,309 +139,266 @@ public class APITest extends PythonTestBase {
     runTest();
   }
 
-/*
- *  @Test
- *  public void testMethodWithHandlerListComplexJsonObject() throws Exception {
- *    runTest();
- *  }
- *
- *  @Test
- *  public void testMethodWithHandlerAsyncResultListJsonObject() throws Exception {
- *    runTest();
- *  }
- */
+  @Test
+  public void testMethodWithHandlerListComplexJsonObject() throws Exception {
+    runTest();
+  }
 
+  @Test
+  public void testMethodWithHandlerAsyncResultListJsonObject() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultListNullJsonObject() throws Exception {
+    runTest();
+  }
+
+
+  @Test
+  public void testMethodWithHandlerAsyncResultListComplexJsonObject() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerSetJsonObject() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerSetNullJsonObject() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultSetJsonObject() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMethodWithHandlerAsyncResultSetNullJsonObject() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMethodWithHandlerAsyncResultSetComplexJsonObject() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerListJsonArray() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMethodWithHandlerListNullJsonArray() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMethodWithHandlerListComplexJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerSetJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerSetNullJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerSetComplexJsonArray() throws Exception {
+    runTest();
+  }
+
+   @Test
+  public void testMethodWithHandlerAsyncResultListJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultListNullJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultListComplexJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultSetJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultSetNullJsonArray() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultSetComplexJsonArray() throws Exception {
+    runTest();
+  }
+
+   @Test
+  public void testMethodWithHandlerListNullDataObject() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerListDataObject() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerSetDataObject() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerSetNullDataObject() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultListNullDataObject() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultListDataObject() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultSetDataObject() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultSetNullDataObject() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultUserTypes() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithConcreteHandlerUserTypeSubtype() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithAbstractHandlerUserTypeSubtype() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithConcreteHandlerUserTypeSubtypeExtension() throws Exception {
+    runTest();
+  }
+
+   @Test
+  public void testMethodWithHandlerVoid() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultVoid() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerAsyncResultVoidFails() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerThrowable() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithHandlerGenericUserType() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithHandlerAsyncResultGenericUserType() throws Exception {
+    runTest();
+  }
+
+   @Test
+  public void testMethodWithGenericParam() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithGenericHandler() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMethodWithGenericHandlerAsyncResult() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testJsonParams() throws Exception {
+    runTest();
+  }
+   @Test
+   public void testNullJsonParams() throws Exception {
+     runTest();
+   }
+   @Test
+  public void testJsonHandlerParams() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testNullJsonHandlerParams() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testComplexJsonHandlerParams() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testJsonHandlerAsyncResultParams() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testNullJsonHandlerAsyncResultParams() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testComplexJsonHandlerAsyncResultParams() throws Exception {
+    runTest();
+  }
+   // Test returns
+   @Test
+  public void testBasicReturns() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testVertxGenReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testVertxGenNullReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testAbstractVertxGenReturn() throws Exception {
+    runTest();
+  }
+
+ /*
+  *  @Test
+  * public void testEnumParam() throws Exception {
+  *   runTest();
+  * }
+  *
+  *  @Test
+  * public void testMethodWithListParams() throws Exception {
+  *   runTest();
+  * }
+  *  @Test
+  * public void testMethodWithSetParams() throws Exception {
+  *   runTest();
+  * }
+  *  @Test
+  * public void testMethodWithMapParams() throws Exception {
+  *   runTest();
+  * }
+  */
   /*
-   *@Test
-   *public void testMethodWithHandlerAsyncResultUserTypes() throws Exception {
+   * @Test
+   *public void testMapComplexJsonArrayReturn() throws Exception {
    *  runTest();
    *}
    */
- /*  @Test
- *  public void testMethodWithConcreteHandlerUserTypeSubtype() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithAbstractHandlerUserTypeSubtype() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerVoid() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultVoid() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultVoidFails() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerThrowable() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerGenericUserType() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultGenericUserType() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetNullJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetComplexJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerListJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerListNullJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerListComplexJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetNullJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetComplexJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerNullListDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerListDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerSetDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerNullSetDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultListComplexJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultListNullJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetNullJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetComplexJsonObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultListJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultListNullJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultListComplexJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetNullJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetComplexJsonArray() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultNullListDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultListDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultSetDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithHandlerAsyncResultNullSetDataObject() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithGenericParam() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithGenericHandler() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithGenericHandlerAsyncResult() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testJsonParams() throws Exception {
- *    runTest();
- *  }
- */
- /* // FIXME - temporarily commented out until we have proper support for nullable / not nullable params using
- * // codegen
- * //  @Test
- * //  public void testNullJsonParams() throws Exception {
- * //    runTest();
- * //  }
- */
- /*  @Test
- *  public void testJsonHandlerParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testNullJsonHandlerParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testComplexJsonHandlerParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testJsonHandlerAsyncResultParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testNullJsonHandlerAsyncResultParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testComplexJsonHandlerAsyncResultParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testEnumParam() throws Exception {
- *    runTest();
- *  }
- */
- /*/
- /*  @Test
- *  public void testMethodWithListParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithSetParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithMapParams() throws Exception {
- *    runTest();
- *  }
- */
- /*  // Test returns
- */
- /*  @Test
- *  public void testBasicReturns() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testVertxGenReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testVertxGenNullReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testAbstractVertxGenReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMapComplexJsonArrayReturn() throws Exception {
- *    runTest();
- *  }
- */
  /*  @Test
  *  public void testOverloadedMethods() throws Exception {
  *    runTest();
