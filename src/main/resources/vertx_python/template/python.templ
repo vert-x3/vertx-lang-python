@@ -156,7 +156,7 @@
 			return "util.list_to_json(" + convertName(paramName) + ")";
         } else if (kind == CLASS_DATA_OBJECT) {
 			return type.simpleName + "(util.dict_to_json(" + convertName(paramName) + "))" + 
-                   " if " + convertName(paramName) + " else None";
+                   " if " + convertName(paramName) + " is not None else None";
 
         } else if (kind.basic) {
 			if (typeName == 'char' || typeName == 'java.lang.Character') {
