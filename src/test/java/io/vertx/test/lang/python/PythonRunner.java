@@ -5,6 +5,7 @@ import java.net.URL;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.InetAddress;
 import java.io.IOException;
+import java.util.Map;
 
 import io.vertx.core.Vertx;
 
@@ -62,6 +63,8 @@ public class PythonRunner {
                                            String.valueOf(port), 
                                            String.valueOf(client_port), 
                                            testName);
+    Map<String, String> env = pb.environment();
+    env.put("PYTHONPATH", "src/main/resources");
     pb.redirectOutput(Redirect.INHERIT);
     pb.redirectError(Redirect.INHERIT);
     Process process = pb.start();

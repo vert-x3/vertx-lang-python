@@ -176,9 +176,10 @@ class TestAPI(unittest.TestCase):
         obj.method_with_data_object_param(**data_object)
 
 
-    def testNullDataObjectParam(self):
-        data_object = {}
-        obj.method_with_null_data_object_param(**data_object)
+    #TODO not really possible to pass a Null object w/ Python API
+    #def testNullDataObjectParam(self):
+        #data_object = {}
+        #obj.method_with_null_data_object_param(**data_object)
 
 
     def testMethodWithHandlerDataObject(self):
