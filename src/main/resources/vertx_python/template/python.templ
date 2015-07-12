@@ -245,6 +245,8 @@
 		@else{param.type.kind == CLASS_DATA_OBJECT}
 			True
 			@comment{"len(@{convertName(param.name)}) > 0"}
+		@else{param.type.kind == CLASS_API}
+			@{convertName(param.name)} is not None
 		@else{}
 			@comment{"Don't check anything, since None might be allowed."}
 			True
@@ -406,9 +408,9 @@
 					@{ind}        return @{convReturn(baseMethod.returnType, genMethodCall(baseMethod), false)}\n
 				@end{}
 			@end{}
-			@if{baseMethod.fluent}
-				        return @if{static}@{ifaceSimpleName}@else{}self@end{}\n
-			@end{}
+		@end{}
+		@if{baseMethod.fluent}
+			        return @if{static}@{ifaceSimpleName}@else{}self@end{}\n
 		@end{}
 		\n
 	@end{}

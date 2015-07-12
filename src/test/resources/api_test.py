@@ -5,6 +5,8 @@ import unittest
 from testmodel_python.testmodel.test_interface import TestInterface
 from testmodel_python.testmodel.refed_interface1 import RefedInterface1
 from testmodel_python.testmodel.refed_interface2 import RefedInterface2
+from testmodel_python.testmodel.super_interface1 import SuperInterface1
+from testmodel_python.testmodel.super_interface2 import SuperInterface2
 from testmodel_python.testmodel.generic_refed_interface import GenericRefedInterface
 from testmodel_python.testmodel.factory import Factory
 from acme_python.pkg.my_interface import MyInterface
@@ -1164,67 +1166,74 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(m, [{'foo' : 'hello'}, {'bar' : 'bye'}])
 
 
-    #def testOverloadedMethods(self):
-        #@refed_obj.set_string('dog')
-        #called = false
-        #ret = obj.overloaded_method('cat', @refed_obj)
-        #self.assertEqual(ret, 'meth1')
-        #ret = obj.overloaded_method('cat', @refed_obj, 12345) { |animal| self.assertEqual(animal, 'giraffe') ; called = true }
-        #self.assertEqual(ret, 'meth2')
-        #self.assertEqual(called, true)
-        #called = false
+    def testOverloadedMethods(self):
+        refed_obj.set_string('dog')
+        dct = dict(called=False)
+        ret = obj.overloaded_method('cat', refed=refed_obj)
+        self.assertEqual(ret, 'meth1')
+        def handler(animal):
+            self.assertEqual(animal, 'giraffe')
+            dct['called'] = True
+        ret = obj.overloaded_method('cat', refed=refed_obj, period=12345, 
+                                    handler=handler)
+        self.assertEqual(ret, 'meth2')
+        self.assertEqual(dct['called'], True)
+        dct = dict(called=False)
         ## for some reason animal is sometimes equals to giraffe and sometimes empty
-        #ret = obj.overloaded_method('cat') { |animal| called = true }
-        #self.assertEqual(ret, 'meth3')
-        #self.assertEqual(called, true)
-        #called = false
-        #ret = obj.overloaded_method('cat', @refed_obj) { |animal| self.assertEqual(animal, 'giraffe') ; called = true }
-        #self.assertEqual(ret, 'meth4')
-        #self.assertEqual(called, true)
-        #self.argument_error { obj.overloaded_method 'cat' }
-        #self.argument_error { obj.overloaded_method('cat', @refed_obj, 12345) }
-        #self.argument_error { obj.overloaded_method {} }
+        def handler2(animal):
+            dct['called'] = True
+        ret = obj.overloaded_method('cat', handler=handler2)
+        self.assertEqual(ret, 'meth3')
+        self.assertEqual(dct['called'], True)
+        dct = dict(called=False)
+        ret = obj.overloaded_method('cat', refed=refed_obj, handler=handler)
+        self.assertEqual(ret, 'meth4')
+        self.assertEqual(dct['called'], True)
+        self.assertRaises(TypeError, obj.overloaded_method, 'cat')
+        self.assertRaises(TypeError, obj.overloaded_method, 'cat', refed=refed_obj,
+                          period=12345)
+        self.assertRaises(TypeError, obj.overloaded_method)
 
 
-    #def testSuperInterfaces(self):
-        #obj.super_method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, true, 88, 'foobar')
-        #self.assertEqual(obj.is_a?(Testmodel::SuperInterface1), true)
-        #obj.other_super_method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, true, 88, 'foobar')
-        #self.assertEqual(obj.is_a?(Testmodel::SuperInterface2), true)
+    def testSuperInterfaces(self):
+        obj.super_method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, True, 88, 'foobar')
+        self.assertIsInstance(obj, SuperInterface1)
+        obj.other_super_method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, True, 88, 'foobar')
+        self.assertIsInstance(obj, SuperInterface2)
 
 
-    #def testMethodWithGenericReturn(self):
-        #ret = obj.method_with_generic_return('JsonObject')
-        #self.assertEqual(ret.class, Hash)
-        #self.assertEqual(ret, {'foo'=>'hello','bar'=>123})
-        #ret = obj.method_with_generic_return('JsonArray')
-        #self.assertEqual(ret.class, Array)
-        #self.assertEqual(ret, %w(foo bar wib))
+    def testMethodWithGenericReturn(self):
+        ret = obj.method_with_generic_return('JsonObject')
+        self.assertEqual(type(ret), dict)
+        self.assertEqual(ret, {'foo' : 'hello', 'bar' : 123})
+        ret = obj.method_with_generic_return('JsonArray')
+        self.assertEqual(type(ret), list)
+        self.assertEqual(ret, ['foo', 'bar', 'wib'])
 
 
-    #def testFluentMethod(self):
-        #ret = obj.fluent_method('bar')
-        #self.assertEqual(ret, obj)
+    def testFluentMethod(self):
+        ret = obj.fluent_method('bar')
+        self.assertEqual(ret, obj)
 
 
-    #def testStaticFactoryMethod(self):
-        #ret = Testmodel::TestInterface.static_factory_method('bar')
-        #self.assertEqual(ret.class, Testmodel::RefedInterface1)
-        #self.assertEqual(ret.get_string, 'bar')
+    def testStaticFactoryMethod(self):
+        ret = TestInterface.static_factory_method('bar')
+        self.assertEqual(type(ret), RefedInterface1)
+        self.assertEqual(ret.get_string(), 'bar')
 
 
-    #def testMethodWithCachedReturn(self):
-        #ret = obj.method_with_cached_return('bar')
-        #ret2 = obj.method_with_cached_return('bar')
-        #self.equals ret, ret2
-        #ret3 = obj.method_with_cached_return('bar')
-        #self.equals ret, ret3
-        #self.equals ret.get_string, 'bar'
-        #self.equals ret2.get_string, 'bar'
-        #self.equals ret3.get_string, 'bar'
-        #ret.set_string 'foo'
-        #self.equals ret2.get_string, 'foo'
-        #self.equals ret3.get_string, 'foo'
+    def testMethodWithCachedReturn(self):
+        ret = obj.method_with_cached_return('bar')
+        ret2 = obj.method_with_cached_return('bar')
+        self.assertEqual(ret, ret2)
+        ret3 = obj.method_with_cached_return('bar')
+        self.assertEqual(ret, ret3)
+        self.assertEqual(ret.get_string(), 'bar')
+        self.assertEqual(ret2.get_string(), 'bar')
+        self.assertEqual(ret3.get_string(), 'bar')
+        ret.set_string('foo')
+        self.assertEqual(ret2.get_string(), 'foo')
+        self.assertEqual(ret3.get_string(), 'foo')
 
 
     #def testJsonReturns(self):
