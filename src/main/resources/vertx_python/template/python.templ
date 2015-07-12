@@ -89,6 +89,13 @@
 			return "util.java_to_python(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 		} else if (kind == CLASS_DATA_OBJECT) {
 			return "util.data_object_to_json(" + expr + ", hashable=" + boolToStr(hashable) + ")";
+		} else if (kind == CLASS_MAP) {
+			var keyType = type.args[0];
+			var valueType = type.args[1];
+			return "{" + convReturn(keyType, "k", hashable) + " : " + 
+                   convReturn(valueType, "v", hashable) + " for k,v in " + expr + ".items()}";
+			
+			return "util.java_map_to_dict(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 		} else if (kind == CLASS_API) {
 			if (type.raw != null) {
 				if (type.raw.simpleName.equals("Throwable")) {
@@ -251,6 +258,7 @@
 @declare{'genMethod'}
 	@code{methodList = methodsByName.get(methodName); overloaded = methodList.size() > 1; method = methodList.get(0);}
 
+
 	@code{requiredParams = []; optionalParams = []; optionsParam = null; paramNames = []; cnt = 0;}
 	@foreach{method: methodList}
 		@if{cnt == 0}
@@ -274,22 +282,21 @@
 					@code{optionalParams.add(param.name)}
 				@end{}
 			@end{}
+			@comment{"Any formerly required params that aren't in newRequired should be optional"}
+			@foreach{param: requiredParams}
+				@if{!newRequiredParams.contains(param) && 
+                    !optionalParams.contains(param)}
+					@code{optionalParams.add(param)}
+				@end{}
+			@end{}
 			@code{requiredParams = newRequiredParams}
 		@end{}
 	@end{}
 
-	@code{childMethods = []}
-	@foreach{method: methodList}
-		@code{base = true; methodParamNames = getParamNames(method)}
-		@foreach{methodParamName : methodParamNames}
-			@if{!requiredParams.contains(methodParamName)}
-				@code{base = false}
-			@end{}
-		@end{}
-		@if{!base}@code{childMethods.add(method)}@end{}
-	@end{}
-
+	@comment{"Try to find 'base' overloaded method. It may not exist, though."}
+	@comment{"If we don't find it, we 'force' it by using the first in the list."}
 	@code{baseMethod = null}
+	@code{forced = false}
 	@foreach{method: methodList}
 		@code{base = true; methodParamNames = getParamNames(method)}
 		@foreach{methodParamName : methodParamNames}
@@ -298,6 +305,26 @@
 			@end{}
 		@end{}
 		@if{base}@code{baseMethod = method}@end{}
+	@end{}
+	@if{baseMethod == null && methodList.size() > 1}
+		@code{forced = true}
+		@code{baseMethod = methodList.get(0)}
+	@end{}
+
+	@code{childMethods = []}
+	@code{zcnt = 0}
+	@foreach{method: methodList}
+		@code{base = true; methodParamNames = getParamNames(method)}
+		@comment{"Add all non-base methods to child list. Handle case where we forced a base."}
+		@if{!forced || zcnt > 0}
+			@foreach{methodParamName : methodParamNames}
+				@if{!requiredParams.contains(methodParamName)}
+					@code{base = false}
+				@end{}
+			@end{}
+		@end{}
+		@code{zcnt++}
+		@if{!base}@code{childMethods.add(method)}@end{}
 	@end{}
 
 	@if{baseMethod != null && static == method.staticMethod}

@@ -58,11 +58,6 @@ public class APITest extends PythonTestBase {
    }
  
    @Test
-   public void testNullDataObjectParam() throws Exception {
-     runTest();
-   }
- 
-   @Test
   public void testMethodWithHandlerDataObject() throws Exception {
     runTest();
   }
@@ -393,12 +388,10 @@ public class APITest extends PythonTestBase {
   *   runTest();
   * }
   */
-  /*
-   * @Test
-   *public void testMapComplexJsonArrayReturn() throws Exception {
-   *  runTest();
-   *}
-   */
+   @Test
+  public void testMapComplexJsonArrayReturn() throws Exception {
+    runTest();
+  }
  /*  @Test
  *  public void testOverloadedMethods() throws Exception {
  *    runTest();
@@ -562,4 +555,11 @@ public class APITest extends PythonTestBase {
  *    runTest();
  *  }
  */
+   // This one is disabled because we can't pass a null data object
+  // To the Python API.
+   //@Test
+   //public void testNullDataObjectParam() throws Exception {
+   //  runTest();
+  // }
+ 
 }

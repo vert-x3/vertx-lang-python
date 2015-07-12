@@ -1158,11 +1158,10 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(ret.get_string(), 'abstractchaffinch')
 
 
-    #def testMapComplexJsonArrayReturn(self):
-        #def handler(map):
-            #m = map['foo']
-            #self.assertEqual(m, [{'foo' : 'hello'}, {'bar' : 'bye'}])
-        #obj.method_with_map_complex_json_array_return(handler)
+    def testMapComplexJsonArrayReturn(self):
+        out = obj.method_with_map_complex_json_array_return(lambda x: x)
+        m = out['foo']
+        self.assertEqual(m, [{'foo' : 'hello'}, {'bar' : 'bye'}])
 
 
     #def testOverloadedMethods(self):
