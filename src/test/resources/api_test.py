@@ -1236,83 +1236,88 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(ret3.get_string(), 'foo')
 
 
-    #def testJsonReturns(self):
-        #ret = obj.method_with_json_object_return
-        #self.assertEqual(ret, {'cheese'=>'stilton'})
-        #ret = obj.method_with_json_array_return
-        #self.assertEqual(ret, %w(socks shoes))
+    def testJsonReturns(self):
+        ret = obj.method_with_json_object_return()
+        self.assertEqual(ret, {'cheese' : 'stilton'})
+        ret = obj.method_with_json_array_return()
+        self.assertEqual(ret, ['socks', 'shoes'])
 
 
-    #def testNullJsonReturns(self):
-        #ret = obj.method_with_null_json_object_return
-        #self.is_nil(ret)
-        #ret = obj.method_with_null_json_array_return
-        #self.is_nil(ret)
+    def testNullJsonReturns(self):
+        ret = obj.method_with_null_json_object_return()
+        self.assertIsNone(ret)
+        ret = obj.method_with_null_json_array_return()
+        self.assertIsNone(ret)
 
 
-    #def testComplexJsonReturns(self):
-        #ret = obj.method_with_complex_json_object_return
-        #self.equals ret, {'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']}
-        #ret = obj.method_with_complex_json_array_return
-        #self.equals ret, [{'foo' => 'hello'}, {'bar' => 'bye'}]
+    def testComplexJsonReturns(self):
+        ret = obj.method_with_complex_json_object_return()
+        self.assertEqual(ret, {'outer' : {'socks' : 'tartan'}, 'list': ['yellow', 'blue']})
+        ret = obj.method_with_complex_json_array_return()
+        self.assertEqual(ret, [{'foo' : 'hello'}, {'bar' : 'bye'}])
 
 
-    #def testEnumReturn(self):
-        #ret = obj.method_with_enum_return('JULIEN')
-        #self.assertEqual(:JULIEN, ret)
-
-
-    #def testMapReturn(self):
-        #readLog = []
-        #writeLog = []
-        #map = obj.method_with_map_return{ |op|
-          #if op =~ /put\([^,]+,[^\)]+\)/ || op =~ /remove\([^\)]+\)/ || op == 'clear()'
-            #writeLog.push op
-          #elsif op == 'size()' || op =~ /get\([^\)]+\)/ || op == 'entrySet()'
-            #readLog.push op
-          #else
-            #raise "unsupported #{op}"
-          #end
-        #}
-        #map['foo'] = 'bar'
-        #self.equals writeLog, ['put(foo,bar)']
+    def testMapReturn(self):
+        readLog = []
+        writeLog = []
+        def handler(op):
+            import re
+            print("YO {}".format(op))
+            wpatt = '|'.join(['put\([^,]+,[^\)]+\)', 'remove\([^\)]+\)'])
+            rpatt = 'get\([^\)]+\)'
+            m = re.match(wpatt, op)
+            if m or op == 'clear()':
+                writeLog.append(op)
+            else:
+                m = re.match(rpatt, op)
+                if m or op in ('size()', 'entryset()'):
+                    readLog.append(op)
+                else:
+                    raise Exception("Unsupported: {}".format(op))
+        print("starting")
+        map = obj.method_with_map_return(handler)
+        print(type(map))
+        print(map)
+        print(type(map))
+        map['foo'] = 'bar'
+        self.assertEqual(writeLog, ['put(foo,bar)'])
         #readLog.clear
         #writeLog.clear
-        #self.equals map['foo'], 'bar'
+        #self.assertEqual(map['foo'], 'bar')
         #self.is_not_nil readLog.index('get(foo)')
-        #self.equals writeLog, []
+        #self.assertEqual(writeLog, [])
         #map['wibble'] = 'quux'
         #readLog.clear
         #writeLog.clear
-        #self.equals map.size, 2
-        #self.equals map['wibble'], 'quux'
+        #self.assertEqual(map.size, 2)
+        #self.assertEqual(map['wibble'], 'quux')
         #self.is_not_nil readLog.index('size()')
-        #self.equals writeLog, []
+        #self.assertEqual(writeLog, [])
         #readLog.clear
         #writeLog.clear
         #map.delete('wibble')
-        #self.equals writeLog, ['remove(wibble)']
-        #self.equals map.size, 1
+        #self.assertEqual(writeLog, ['remove(wibble)'])
+        #self.assertEqual(map.size, 1)
         #map['blah'] = '123'
         #key_dct = dict(count=0)
         #readLog.clear
         #writeLog.clear
         #map.each { |k,v|
           #if key_count == 0
-            #self.equals k, 'foo'
-            #self.equals v, 'bar'
+            #self.assertEqual(k, 'foo')
+            #self.assertEqual(v, 'bar')
             #key_dct['count'] += 1
           #else
-            #self.equals k, 'blah'
-            #self.equals v, '123'
+            #self.assertEqual(k, 'blah')
+            #self.assertEqual(v, '123')
           #end
         #}
         #self.is_not_nil readLog.index('entrySet()')
-        #self.equals writeLog, []
+        #self.assertEqual(writeLog, [])
         #readLog.clear
         #writeLog.clear
         #map.clear
-        #self.equals writeLog, ['clear()']
+        #self.assertEqual(writeLog, ['clear()'])
 
 
     #def testMapStringReturn(self):
@@ -1596,6 +1601,11 @@ class TestAPI(unittest.TestCase):
             #{'foo'=>Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('foo'),'eek'=>Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('bar')}
         #)
         #self.argument_error { obj.method_with_list_params(nil, nil, nil, nil, nil, nil, nil, nil) }
+
+
+    #def testEnumReturn(self):
+        #ret = obj.method_with_enum_return('JULIEN')
+        #self.assertEqual(:JULIEN, ret)
 
 
     #def testEnumParam(self):

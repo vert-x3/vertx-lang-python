@@ -3,7 +3,7 @@ from __future__ import unicode_literals, print_function, absolute_import
 import json
 import collections
 import operator
-from functools import partial
+from functools import partial, wraps
 from contextlib import contextmanager
 
 from .compat import unicode, long, basestring
@@ -161,3 +161,14 @@ def java_to_python(obj, hashable=False):
         return json_to_python(obj, hashable=hashable)
     else:
         return obj
+
+
+def cached(func):
+    dct = dict(cached_ret=None)
+    @wraps(func)
+    def inner(*args, **kwargs):
+        if dct['cached_ret'] is None:
+            dct['cached_ret'] = func(*args, **kwargs)
+        return dct['cached_ret']
+    return inner
+

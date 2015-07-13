@@ -368,82 +368,52 @@ public class APITest extends PythonTestBase {
   public void testAbstractVertxGenReturn() throws Exception {
     runTest();
   }
-
- /*
-  *  @Test
-  * public void testEnumParam() throws Exception {
-  *   runTest();
-  * }
-  *
-  *  @Test
-  * public void testMethodWithListParams() throws Exception {
-  *   runTest();
-  * }
-  *  @Test
-  * public void testMethodWithSetParams() throws Exception {
-  *   runTest();
-  * }
-  *  @Test
-  * public void testMethodWithMapParams() throws Exception {
-  *   runTest();
-  * }
-  */
    @Test
   public void testMapComplexJsonArrayReturn() throws Exception {
     runTest();
   }
- /*  @Test
- *  public void testOverloadedMethods() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSuperInterfaces() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithGenericReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testFluentMethod() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testStaticFactoryMethod() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMethodWithCachedReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testJsonReturns() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testNullJsonReturns() throws Exception {
- *    runTest();
- *  }
- */
- /*/
- /*/
- /*  @Test
- *  public void testEnumReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMapReturn() throws Exception {
- *    runTest();
- *  }
- */
+  @Test
+  public void testOverloadedMethods() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testSuperInterfaces() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithGenericReturn() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testFluentMethod() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testStaticFactoryMethod() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testMethodWithCachedReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testJsonReturns() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testNullJsonReturns() throws Exception {
+    runTest();
+  }
+ 
+  @Test
+  public void testMapReturn() throws Exception {
+    runTest();
+  }
  /*  @Test
  *  public void testMapStringReturn() throws Exception {
  *    runTest();
@@ -554,7 +524,29 @@ public class APITest extends PythonTestBase {
  *  public void testCustomModule() throws Exception {
  *    runTest();
  *  }
- */
+ /*  @Test
+ *  public void testEnumReturn() throws Exception {
+ *    runTest();
+ *  }
+ *
+  *  @Test
+  * public void testEnumParam() throws Exception {
+  *   runTest();
+  * }
+  *
+  *  @Test
+  * public void testMethodWithListParams() throws Exception {
+  *   runTest();
+  * }
+  *  @Test
+  * public void testMethodWithSetParams() throws Exception {
+  *   runTest();
+  * }
+  *  @Test
+  * public void testMethodWithMapParams() throws Exception {
+  *   runTest();
+  * }
+  */
    // This one is disabled because we can't pass a null data object
   // To the Python API.
    //@Test

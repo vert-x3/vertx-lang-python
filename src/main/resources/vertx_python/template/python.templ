@@ -90,12 +90,13 @@
 		} else if (kind == CLASS_DATA_OBJECT) {
 			return "util.data_object_to_json(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 		} else if (kind == CLASS_MAP) {
-			var keyType = type.args[0];
-			var valueType = type.args[1];
-			return "{" + convReturn(keyType, "k", hashable) + " : " + 
-                   convReturn(valueType, "v", hashable) + " for k,v in " + expr + ".items()}";
-			
-			return "util.java_map_to_dict(" + expr + ", hashable=" + boolToStr(hashable) + ")";
+			/*
+			*var keyType = type.args[0];
+			*var valueType = type.args[1];
+			*return "{" + convReturn(keyType, "k", hashable) + " : " + 
+            *       convReturn(valueType, "v", hashable) + " for k,v in " + expr + ".items()}";
+			*/
+			return expr;
 		} else if (kind == CLASS_API) {
 			if (type.raw != null) {
 				if (type.raw.simpleName.equals("Throwable")) {
@@ -330,6 +331,7 @@
 	@end{}
 
 	@if{baseMethod != null && static == method.staticMethod}
+		@if{method.cacheReturn}@{ind}@@util.cached\n@end{}
 		@if{static}@{ind}@@classmethod\n@end{}
 		@{ind}def @{convertName(methodName)}(self
 		@foreach{param : requiredParams}
