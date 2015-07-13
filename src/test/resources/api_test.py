@@ -1,4 +1,5 @@
 from __future__ import unicode_literals, print_function, absolute_import
+import re
 import sys
 import unittest
 
@@ -14,7 +15,9 @@ from acme_python.sub.sub_interface import SubInterface
 
 from vertx_python import util
 from vertx_python.util import frozendict
-from vertx_python.compat import long, unicode
+from vertx_python.compat import long, unicode, iteritems
+
+from py4j.protocol import Py4JJavaError
 
 util.vertx_init()
 
@@ -1207,7 +1210,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(type(ret), dict)
         self.assertEqual(ret, {'foo' : 'hello', 'bar' : 123})
         ret = obj.method_with_generic_return('JsonArray')
-        self.assertEqual(type(ret), list)
+        self.assertIsInstance(ret, list)
         self.assertEqual(ret, ['foo', 'bar', 'wib'])
 
 
@@ -1261,8 +1264,6 @@ class TestAPI(unittest.TestCase):
         readLog = []
         writeLog = []
         def handler(op):
-            import re
-            print("YO {}".format(op))
             wpatt = '|'.join(['put\([^,]+,[^\)]+\)', 'remove\([^\)]+\)'])
             rpatt = 'get\([^\)]+\)'
             m = re.match(wpatt, op)
@@ -1270,337 +1271,377 @@ class TestAPI(unittest.TestCase):
                 writeLog.append(op)
             else:
                 m = re.match(rpatt, op)
-                if m or op in ('size()', 'entryset()'):
+                if m or op in ('size()', 'keySet()'):
                     readLog.append(op)
                 else:
                     raise Exception("Unsupported: {}".format(op))
-        print("starting")
         map = obj.method_with_map_return(handler)
-        print(type(map))
-        print(map)
-        print(type(map))
         map['foo'] = 'bar'
         self.assertEqual(writeLog, ['put(foo,bar)'])
-        #readLog.clear
-        #writeLog.clear
-        #self.assertEqual(map['foo'], 'bar')
-        #self.is_not_nil readLog.index('get(foo)')
-        #self.assertEqual(writeLog, [])
-        #map['wibble'] = 'quux'
-        #readLog.clear
-        #writeLog.clear
-        #self.assertEqual(map.size, 2)
-        #self.assertEqual(map['wibble'], 'quux')
-        #self.is_not_nil readLog.index('size()')
-        #self.assertEqual(writeLog, [])
-        #readLog.clear
-        #writeLog.clear
-        #map.delete('wibble')
-        #self.assertEqual(writeLog, ['remove(wibble)'])
-        #self.assertEqual(map.size, 1)
-        #map['blah'] = '123'
-        #key_dct = dict(count=0)
-        #readLog.clear
-        #writeLog.clear
-        #map.each { |k,v|
-          #if key_count == 0
-            #self.assertEqual(k, 'foo')
-            #self.assertEqual(v, 'bar')
-            #key_dct['count'] += 1
-          #else
-            #self.assertEqual(k, 'blah')
-            #self.assertEqual(v, '123')
-          #end
-        #}
-        #self.is_not_nil readLog.index('entrySet()')
-        #self.assertEqual(writeLog, [])
-        #readLog.clear
-        #writeLog.clear
-        #map.clear
-        #self.assertEqual(writeLog, ['clear()'])
-
-
-    #def testMapStringReturn(self):
-        #map = obj.method_with_map_string_return {}
-        #val = map['foo']
-        #self.equals val.class, String
-        #self.equals val, 'bar'
-        #map['juu'] = 'daa'
-        #self.equals map, {'foo'=>'bar','juu'=>'daa'}
-        #self.argument_error { map['wibble'] = 123 }
-        #self.equals map, {'foo'=>'bar','juu'=>'daa'}
-
-
-    #def testMapJsonObjectReturn(self):
-        #map = obj.method_with_map_json_object_return {}
-        #json = map['foo']
-        #self.equals json.class, Hash
-        #self.equals json['wibble'], 'eek'
-        #map['bar'] = {'juu'=>'daa'}
-        #self.equals map, {'foo'=>{'wibble'=>'eek'},'bar'=>{'juu'=>'daa'}}
-        #self.argument_error { map['juu'] = 123 }
-        #self.equals map, {'foo'=>{'wibble'=>'eek'},'bar'=>{'juu'=>'daa'}}
-
-
-    #def testMapComplexJsonObjectReturn(self):
-        #map = obj.method_with_map_complex_json_object_return {}
-        #m = map['foo']
-        #self.equals m, {'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']}
-
-
-    #def testMapJsonArrayReturn(self):
-        #map = obj.method_with_map_json_array_return {}
-        #arr = map['foo']
-        #self.equals arr.class, Array
-        #self.equals arr, ['wibble']
-        #map['bar'] = ['spidey']
-        #self.equals map, {'foo'=>['wibble'],'bar'=>['spidey']}
-        #self.argument_error { map['juu'] = 123 }
-        #self.equals map, {'foo'=>['wibble'],'bar'=>['spidey']}
-
-
-    #def testMapLongReturn(self):
-        #map = obj.method_with_map_long_return {}
-        #num = map['foo']
-        #self.equals num.class, Fixnum
-        #self.equals num, 123
-        #map['bar'] = 321
-        #self.equals map, {'foo'=>123,'bar'=>321}
-        #self.argument_error { map['juu'] = 'something' }
-        #self.equals map, {'foo'=>123,'bar'=>321}
-
-
-    #def testMapIntegerReturn(self):
-        #map = obj.method_with_map_integer_return {}
-        #num = map['foo']
-        #self.equals num.class, Fixnum
-        #self.equals num, 123
-        #map['bar'] = 321
-        #self.equals map, {'foo'=>123,'bar'=>321}
-        #self.argument_error { map['juu'] = 'something' }
-        #self.equals map, {'foo'=>123,'bar'=>321}
-
-
-    #def testMapShortReturn(self):
-        #map = obj.method_with_map_short_return {}
-        #num = map['foo']
-        #self.equals num.class, Fixnum
-        #self.equals num, 123
-        #map['bar'] = 321
-        #self.equals map, {'foo'=>123,'bar'=>321}
-        #self.argument_error { map['juu'] = 'something' }
-        #self.equals map, {'foo'=>123,'bar'=>321}
-
-
-    #def testMapByteReturn(self):
-        #map = obj.method_with_map_byte_return {}
-        #num = map['foo']
-        #self.equals num.class, Fixnum
-        #self.equals num, 123
-        #map['bar'] = 12
-        #self.equals map, {'foo'=>123,'bar'=>12}
-        #self.argument_error { map['juu'] = 'something' }
-        #self.equals map, {'foo'=>123,'bar'=>12}
-
-
-    #def testMapCharacterReturn(self):
-        #map = obj.method_with_map_character_return {}
-        #num = map['foo']
-        #self.equals num.class, Fixnum
-        #self.equals num, 88
-        #map['bar'] = 89
-        #self.equals map, {'foo'=>88,'bar'=>89}
-        #self.argument_error { map['juu'] = 'something' }
-        #self.equals map, {'foo'=>88,'bar'=>89}
-
-
-    #def testMapBooleanReturn(self):
-        #map = obj.method_with_map_boolean_return {}
-        #num = map['foo']
-        #self.equals num.class, TrueClass
-        #self.equals num, true
-        #map['bar'] = false
-        #self.equals map, {'foo'=>true,'bar'=>false}
-        #map['juu'] = 'something'
-        #map['daa'] = nil
-        #self.equals map, {'foo'=>true,'bar'=>false,'juu'=>true,'daa'=>false}
-
-
-    #def testMapFloatReturn(self):
-        #map = obj.method_with_map_float_return {}
-        #num = map['foo']
-        #self.equals num.class, Float
-        #self.equals num, 0.123
-        #map['bar'] = 0.321
-        #self.equals map['foo'], 0.123
-        #self.equals map['bar'], 0.321
-        #self.equals map.keys.sort, %w(bar foo)
-        #self.argument_error { map['juu'] = 'something' }
-        #self.equals map['foo'], 0.123
-        #self.equals map['bar'], 0.321
-        #self.equals map.keys.sort, %w(bar foo)
-
-
-    #def testMapDoubleReturn(self):
-        #map = obj.method_with_map_double_return {}
-        #num = map['foo']
-        #self.equals num.class, Float
-        #self.equals num, 0.123
-        #map['bar'] = 0.321
-        #self.equals map, {'foo'=>0.123,'bar'=>0.321}
-        #self.argument_error { map['juu'] = 'something' }
-        #self.equals map, {'foo'=>0.123,'bar'=>0.321}
-
-
-    #def testMapNullReturn(self):
-        #map = obj.method_with_null_map_return
-        #self.is_nil map
-
-
-    #def testListStringReturn(self):
-        #ret = obj.method_with_list_string_return
-        #self.has_class ret, Array
-        #self.equals ret, %w(foo bar wibble)
-
-
-    #def testListLongReturn(self):
-        #ret = obj.method_with_list_long_return
-        #self.has_class ret, Array
-        #self.equals ret, [123,456]
-
-
-    #def testListJsonObjectReturn(self):
-        #ret = obj.method_with_list_json_object_return
-        #self.has_class ret, Array
-        #self.equals ret, [{'foo'=>'bar'},{'blah'=>'eek'}]
-
-
-    #def testListComplexJsonObjectReturn(self):
-        #ret = obj.method_with_list_complex_json_object_return
-        #self.has_class ret, Array
-        #self.equals ret, [{'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']}]
-
-
-    #def testListJsonArrayReturn(self):
-        #ret = obj.method_with_list_json_array_return
-        #self.has_class ret, Array
-        #self.equals ret, [['foo'],['blah']]
-
-
-    #def testListComplexJsonArrayReturn(self):
-        #ret = obj.method_with_list_complex_json_array_return
-        #self.has_class ret, Array
-        #self.equals ret, [[{'foo' => 'hello'}],[{'bar' => 'bye'}]]
-
-
-    #def testListVertxGenReturn(self):
-        #ret = obj.method_with_list_vertx_gen_return
-        #self.has_class ret, Array
-        #self.has_class ret[0], Testmodel::RefedInterface1
-        #self.equals ret[0].get_string, 'foo'
-        #self.has_class ret[1], Testmodel::RefedInterface1
-        #self.equals ret[1].get_string, 'bar'
-
-
-    #def testSetStringReturn(self):
-        #ret = obj.method_with_set_string_return
-        #self.has_class ret, Set
-        #self.equals ret, Set.new(%w(foo bar wibble))
-
-
-    #def testSetLongReturn(self):
-        #ret = obj.method_with_set_long_return
-        #self.has_class ret, Set
-        #self.equals ret, Set.new([123,456])
-
-
-    #def testSetJsonObjectReturn(self):
-        #ret = obj.method_with_set_json_object_return
-        #self.has_class ret, Set
-        #self.equals ret, Set.new([{'foo'=>'bar'},{'blah'=>'eek'}])
-
-
-    #def testSetComplexJsonObjectReturn(self):
-        #ret = obj.method_with_set_complex_json_object_return
-        #self.has_class ret, Set
-        #self.equals ret, [{'outer' => {'socks' => 'tartan'}, 'list'=> ['yellow', 'blue']}].to_set
-
-
-    #def testSetJsonArrayReturn(self):
-        #ret = obj.method_with_set_json_array_return
-        #self.has_class ret, Set
-        #self.equals ret, Set.new([['foo'],['blah']])
-
-
-    #def testSetComplexJsonArrayReturn(self):
-        #ret = obj.method_with_set_complex_json_array_return
-        #self.has_class ret, Set
-        #self.equals ret, [[{'foo' => 'hello'}], [{'bar' => 'bye'}]].to_set
-
-
-    #def testSetVertxGenReturn(self):
-        #ret = obj.method_with_set_vertx_gen_return
-        #self.has_class ret, Set
-        #ret.each { |elt| self.has_class(elt, Testmodel::RefedInterface1) }
-        #self.assertEqual(ret.map { |o| o.get_string }.to_set, Set.new(%w(foo bar)))
-
-
-    #def testThrowableReturn(self):
-        #ret = obj.method_with_throwable_return 'bogies'
-        #self.assertEqual('bogies', ret.message)
-
-
-    #def testCustomModule(self):
-        #my = Acme::MyInterface.create
-        #test_interface = my.method
-        #test_interface.method_with_basic_params(123, 12345, 1234567, 1265615234, 12.345, 12.34566, true, 88, 'foobar')
-        #sub = my.sub
-        #ret = sub.reverse "hello"
-        #self.equals ret, "olleh"
-
-
-    #def testMethodWithListParams(self):
-        #obj.method_with_list_params(
-            #%w(foo bar),
-            #[2, 3],
-            #[12, 13],
-            #[1234, 1345],
-            #[123, 456],
-            #[{:foo=>'bar'}, {:eek=>'wibble'}],
-            #[['foo'], ['blah']],
-            #[Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('foo'), Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('bar')],
-            #[{:foo=>'String 1',:bar=>1,:wibble=>1.1}, {:foo=>'String 2',:bar=>2,:wibble=>2.2}]
-        #)
-        #self.argument_error { obj.method_with_list_params(nil, nil, nil, nil, nil, nil, nil, nil) }
-
-
-    #def testMethodWithSetParams(self):
-        #obj.method_with_set_params(
-            #Set.new(['foo', 'bar']),
-            #Set.new([2, 3]),
-            #Set.new([12, 13]),
-            #Set.new([1234, 1345]),
-            #Set.new([123, 456]),
-            #Set.new([{:foo=>'bar'}, {:eek=>'wibble'}]),
-            #Set.new([['foo'], ['blah']]),
-            #Set.new([Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('foo'), Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('bar')]),
-            #Set.new([{:foo=>'String 1',:bar=>1,:wibble=>1.1}, {:foo=>'String 2',:bar=>2,:wibble=>2.2}])
-        #)
-        #self.argument_error { obj.method_with_list_params(nil, nil, nil, nil, nil, nil, nil, nil) }
-
-
-    #def testMethodWithMapParams(self):
-        #obj.method_with_map_params(
-            #{'foo'=>'bar','eek'=>'wibble'},
-            #{'foo'=>2,'eek'=>3},
-            #{'foo'=>12,'eek'=>13},
-            #{'foo'=>1234,'eek'=>1345},
-            #{'foo'=>123,'eek'=>456},
-            #{'foo'=>{'foo'=>'bar'},'eek'=>{'eek'=>'wibble'}},
-            #{'foo'=>['foo'],'eek'=>['blah']},
-            #{'foo'=>Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('foo'),'eek'=>Testmodel::RefedInterface1.new(RefedInterface1Impl.new).set_string('bar')}
-        #)
-        #self.argument_error { obj.method_with_list_params(nil, nil, nil, nil, nil, nil, nil, nil) }
+        readLog[:] = []
+        writeLog[:] = []
+        self.assertEqual(map['foo'], 'bar')
+        readLog.index('get(foo)')
+        self.assertEqual(writeLog, [])
+        map['wibble'] = 'quux'
+        readLog[:] = []
+        writeLog[:] = []
+        self.assertEqual(len(map), 2)
+        self.assertEqual(map['wibble'], 'quux')
+        readLog.index('size()')
+        self.assertEqual(writeLog, [])
+        readLog[:] = []
+        writeLog[:] = []
+        del map['wibble']
+        self.assertEqual(writeLog, ['remove(wibble)'])
+        self.assertEqual(len(map), 1)
+        map['blah'] = '123'
+        key_count = 0
+        readLog[:] = []
+        writeLog[:] = []
+        for k,v in iteritems(map):
+            if key_count == 0:
+                self.assertEqual(k, 'foo')
+                self.assertEqual(v, 'bar')
+                key_count += 1
+            else:
+                self.assertEqual(k, 'blah')
+                self.assertEqual(v, '123')
+        readLog.index('keySet()')
+        self.assertEqual(writeLog, [])
+        readLog[:] = []
+        writeLog[:] = []
+        map.clear()
+        # Clear maps to removing each item one by one.
+        self.assertEqual(writeLog, ['remove(foo)', 'remove(blah)'])
+
+
+    def testMapStringReturn(self):
+        map = obj.method_with_map_string_return(lambda x: x)
+        val = map['foo']
+        self.assertEqual(type(val), unicode)
+        self.assertEqual(val, 'bar')
+        map['juu'] = 'daa'
+        self.assertEqual(map.to_python(), {'foo' : 'bar','juu' : 'daa'})
+        def test():
+            map['wibble'] = 123
+        self.assertRaises(Exception, test)
+        self.assertEqual(map.to_python(), {'foo' : 'bar','juu' : 'daa'})
+
+
+    def testMapJsonObjectReturn(self):
+        map = obj.method_with_map_json_object_return(lambda x: x)
+        json = map['foo']
+        self.assertEqual(type(json), dict)
+        self.assertEqual(json['wibble'], 'eek')
+        map['bar'] = {'juu' : 'daa'}
+        self.assertEqual(map.to_python(), {'foo' : {'wibble' : 'eek'}, 'bar' : {'juu' : 'daa'}})
+        def test():
+            map['juu'] = 123
+        self.assertRaises(Exception, test)
+        self.assertEqual(map.to_python(), {'foo' : {'wibble' : 'eek'}, 'bar' : {'juu' : 'daa'}})
+
+
+    def testMapComplexJsonObjectReturn(self):
+        map = obj.method_with_map_complex_json_object_return(lambda x: x)
+        m = map['foo']
+        self.assertEqual(m, {'outer' : {'socks' : 'tartan'}, 'list' : ['yellow', 'blue']})
+
+
+    def testMapJsonArrayReturn(self):
+        map = obj.method_with_map_json_array_return(lambda x:x)
+        arr = map['foo']
+        self.assertEqual(type(arr), list)
+        self.assertEqual(arr, ['wibble'])
+        map['bar'] = ['spidey']
+        self.assertEqual(map.to_python(), {'foo' : ['wibble'],'bar' : ['spidey']})
+        def test():
+            map['juu'] = 123
+        self.assertRaises(Py4JJavaError, test)
+        self.assertEqual(map.to_python(), {'foo' : ['wibble'],'bar' : ['spidey']})
+
+
+    def testMapLongReturn(self):
+        map = obj.method_with_map_long_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), long)
+        self.assertEqual(num, 123)
+        map['bar'] = 321
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 321})
+        def test():
+            map['juu'] = 'something'
+        self.assertRaises(Py4JJavaError, test)
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 321})
+
+
+    def testMapIntegerReturn(self):
+        map = obj.method_with_map_integer_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), int)
+        self.assertEqual(num, 123)
+        map['bar'] = 321
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 321})
+        def test():
+            map['juu'] = 'something'
+        self.assertRaises(Py4JJavaError, test)
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 321})
+
+
+    def testMapShortReturn(self):
+        map = obj.method_with_map_short_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), int)
+        self.assertEqual(num, 123)
+        map['bar'] = 321
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 321})
+        def test():
+            map['juu'] = 'something'
+        self.assertRaises(Py4JJavaError, test)
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 321})
+
+
+    def testMapByteReturn(self):
+        map = obj.method_with_map_byte_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), int)
+        self.assertEqual(num, 123)
+        map['bar'] = 12
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 12})
+        def test():
+            map['juu'] = 'something'
+        self.assertRaises(Py4JJavaError, test)
+        self.assertEqual(map.to_python(), {'foo' : 123,'bar' : 12})
+
+
+    def testMapCharacterReturn(self):
+        map = obj.method_with_map_character_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), unicode)
+        self.assertEqual(num, 'X')
+        map['bar'] = 'Y'
+        self.assertEqual(map.to_python(), {'foo' : 'X','bar' : 'Y'})
+        def test():
+            map['juu'] = 'something'
+        self.assertRaises(ValueError, test)
+        self.assertEqual(map.to_python(), {'foo' : 'X','bar' : 'Y'})
+
+
+    def testMapBooleanReturn(self):
+        map = obj.method_with_map_boolean_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), bool)
+        self.assertEqual(num, True)
+        map['bar'] = False
+        self.assertEqual(map.to_python(), {'foo' : True,'bar' : False})
+        map['juu'] = 'something'
+        map['daa'] = None
+        self.assertEqual(map.to_python(), {'foo' : True,'bar' : False,'juu' : True,'daa' : False})
+
+
+    def testMapFloatReturn(self):
+        map = obj.method_with_map_float_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), float)
+        self.assertEqual(num, 0.123)
+        map['bar'] = 0.321
+        self.assertEqual(map['foo'], 0.123)
+        self.assertEqual(map['bar'], 0.321)
+        self.assertEqual(sorted(map.keys()), ['bar', 'foo'])
+        def test():
+            map['juu'] = 'something'
+        self.assertRaises(Py4JJavaError, test)
+        self.assertEqual(map['foo'], 0.123)
+        self.assertEqual(map['bar'], 0.321)
+        self.assertEqual(sorted(map.keys()), ['bar', 'foo'])
+
+
+    def testMapDoubleReturn(self):
+        map = obj.method_with_map_double_return(lambda x:x)
+        num = map['foo']
+        self.assertEqual(type(num), float)
+        self.assertEqual(num, 0.123)
+        map['bar'] = 0.321
+        self.assertEqual(map.to_python(), {'foo' : 0.123,'bar' : 0.321})
+        def test():
+            map['juu'] = 'something'
+        self.assertRaises(Py4JJavaError, test)
+        self.assertEqual(map.to_python(), {'foo' : 0.123,'bar' : 0.321})
+
+
+    def testMapNullReturn(self):
+        map = obj.method_with_null_map_return()
+        self.assertIsNone(map)
+
+
+    def testListStringReturn(self):
+        ret = obj.method_with_list_string_return()
+        self.assertIsInstance(ret, list)
+        self.assertEqual(ret, ['foo', 'bar', 'wibble'])
+
+
+    def testListLongReturn(self):
+        ret = obj.method_with_list_long_return()
+        self.assertIsInstance(ret, list)
+        self.assertEqual(ret, [123,456])
+
+
+    def testListJsonObjectReturn(self):
+        ret = obj.method_with_list_json_object_return()
+        self.assertIsInstance(ret, list)
+        self.assertEqual(ret, [{'foo' : 'bar'},{'blah' : 'eek'}])
+
+
+    def testListComplexJsonObjectReturn(self):
+        ret = obj.method_with_list_complex_json_object_return()
+        self.assertIsInstance(ret, list)
+        self.assertEqual(ret, [{'outer' : {'socks' : 'tartan'}, 'list' : ['yellow', 'blue']}])
+
+
+    def testListJsonArrayReturn(self):
+        ret = obj.method_with_list_json_array_return()
+        self.assertIsInstance(ret, list)
+        self.assertEqual(ret, [['foo'],['blah']])
+
+
+    def testListComplexJsonArrayReturn(self):
+        ret = obj.method_with_list_complex_json_array_return()
+        self.assertIsInstance(ret, list)
+        self.assertEqual(ret, [[{'foo' : 'hello'}],[{'bar' : 'bye'}]])
+
+
+    def testListVertxGenReturn(self):
+        ret = obj.method_with_list_vertx_gen_return()
+        self.assertIsInstance(ret, list)
+        self.assertEqual(type(ret[0]), RefedInterface1)
+        self.assertEqual(ret[0].get_string(), 'foo')
+        self.assertEqual(type(ret[1]), RefedInterface1)
+        self.assertEqual(ret[1].get_string(), 'bar')
+
+
+    def testSetStringReturn(self):
+        ret = obj.method_with_set_string_return()
+        self.assertIsInstance(ret, set)
+        self.assertEqual(ret, set(['foo', 'bar', 'wibble']))
+
+
+    def testSetLongReturn(self):
+        ret = obj.method_with_set_long_return()
+        self.assertIsInstance(ret, set)
+        self.assertEqual(ret, set([123,456]))
+
+
+    def testSetJsonObjectReturn(self):
+        ret = obj.method_with_set_json_object_return()
+        self.assertEqual(type(ret), set)
+        self.assertEqual(ret, set([frozendict({'foo':'bar'}),
+                                   frozendict({'blah':'eek'})
+                                  ])
+                        )
+
+
+    def testSetComplexJsonObjectReturn(self):
+        ret = obj.method_with_set_complex_json_object_return()
+        self.assertEqual(type(ret), set)
+        self.assertEqual(ret, set([frozendict({'outer' : frozendict({'socks' : 'tartan'}), 
+                                               'list': frozenset(['yellow', 'blue'])})
+                                 ])
+                        )
+
+
+    def testSetJsonArrayReturn(self):
+        ret = obj.method_with_set_json_array_return()
+        self.assertIsInstance(ret, set)
+        self.assertEqual(ret, set([frozenset(['foo']), 
+                                   frozenset(['blah'])
+                                  ])
+                        )
+
+
+    def testSetComplexJsonArrayReturn(self):
+        ret = obj.method_with_set_complex_json_array_return()
+        self.assertIsInstance(ret, set)
+        self.assertEqual(ret, set([frozenset([frozendict({'foo' : 'hello'})]), 
+                                   frozenset([frozendict({'bar' : 'bye'})])
+                                  ])
+                        )
+
+
+    def testSetVertxGenReturn(self):
+        ret = obj.method_with_set_vertx_gen_return()
+        self.assertIsInstance(ret, set)
+        for elt in ret:
+            self.assertIsInstance(elt, RefedInterface1)
+        self.assertEqual(set([o.get_string() for o in ret]), set(['foo', 'bar']))
+
+
+    def testThrowableReturn(self):
+        ret = obj.method_with_throwable_return('bogies')
+        self.assertEqual('bogies', ret.getMessage())
+
+
+    def testCustomModule(self):
+        my = MyInterface.create()
+        test_interface = my.method()
+        test_interface.method_with_basic_params(123, 12345, 1234567, 
+                                                1265615234, 12.345, 12.34566, 
+                                                True, 'X', 'foobar')
+        sub = my.sub()
+        ret = sub.reverse("hello")
+        self.assertEqual(ret, "olleh")
+
+
+    def testMethodWithListParams(self):
+        obj.method_with_list_params(
+            ['foo', 'bar'],
+            [2, 3],
+            [12, 13],
+            [1234, 1345],
+            [123, 456],
+            [{'foo':'bar'}, {'eek':'wibble'}],
+            [['foo'], ['blah']],
+            [RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('foo'), 
+             RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('bar')],
+            [{'foo':'String 1','bar':1,'wibble':1.1}, {'foo':'String 2','bar':2,'wibble':2.2}]
+        )
+        self.assertRaises(TypeError,
+                          obj.method_with_list_params(None, None, None, None, 
+                                                      None, None, None, None))
+
+
+    def testMethodWithSetParams(self):
+        obj.method_with_set_params(
+            set(['foo', 'bar']),
+            set([2, 3]),
+            set([12, 13]),
+            set([1234, 1345]),
+            set([123, 456]),
+            set([frozendict({'foo':'bar'}), frozendict({'eek':'wibble'})]),
+            set([frozenset(['foo']), frozenset(['blah'])]),
+            set([RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('foo'), 
+             RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('bar')]),
+            set([frozendict({'foo':'String 1','bar':1,'wibble':1.1}), 
+                 frozendict({'foo':'String 2','bar':2,'wibble':2.2})])
+        )
+        self.assertRaises(TypeError,
+                          obj.method_with_set_params(None, None, None, None, 
+                                                     None, None, None, None))
+
+
+    def testMethodWithMapParams(self):
+        obj.method_with_map_params(
+            {'foo' : 'bar', 'eek' : 'wibble'},
+            {'foo' : 2, 'eek' : 3},
+            {'foo' : 12, 'eek' : 13},
+            {'foo' : 1234, 'eek' : 1345},
+            {'foo' : 123, 'eek' : 456},
+            {'foo' : {'foo' : 'bar'}, 'eek' : {'eek' : 'wibble'}},
+            {'foo' : ['foo'], 'eek' : ['blah']},
+            {'foo' : RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('foo'),
+             'eek' : RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('bar')}
+        )
+        self.assertRaises(TypeError,
+                          obj.method_with_map_params(None, None, None, None, 
+                                                     None, None, None, None))
 
 
     #def testEnumReturn(self):

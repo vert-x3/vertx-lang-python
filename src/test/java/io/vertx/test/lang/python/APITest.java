@@ -369,9 +369,9 @@ public class APITest extends PythonTestBase {
     runTest();
   }
    @Test
-  public void testMapComplexJsonArrayReturn() throws Exception {
-    runTest();
-  }
+   public void testMapComplexJsonArrayReturn() throws Exception {
+     runTest();
+   }
   @Test
   public void testOverloadedMethods() throws Exception {
     runTest();
@@ -414,136 +414,146 @@ public class APITest extends PythonTestBase {
   public void testMapReturn() throws Exception {
     runTest();
   }
- /*  @Test
- *  public void testMapStringReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMapJsonObjectReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMapComplexJsonObjectReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMapJsonArrayReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMapLongReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testMapNullReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testListStringReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testListLongReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testListJsonObjectReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testListComplexJsonObjectReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testListJsonArrayReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testListComplexJsonArrayReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testListVertxGenReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSetStringReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSetLongReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSetJsonObjectReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSetComplexJsonObjectReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSetJsonArrayReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSetComplexJsonArrayReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testSetVertxGenReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*/
- /*  @Test
- *  public void testThrowableReturn() throws Exception {
- *    runTest();
- *  }
- */
- /*  @Test
- *  public void testCustomModule() throws Exception {
- *    runTest();
- *  }
+   @Test
+  public void testMapStringReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapJsonObjectReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapComplexJsonObjectReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testMapJsonArrayReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapLongReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapIntegerReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapShortReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapByteReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapCharacterReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapBooleanReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapFloatReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapDoubleReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testMapNullReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testListStringReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testListLongReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testListJsonObjectReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testListComplexJsonObjectReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testListJsonArrayReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testListComplexJsonArrayReturn() throws Exception {
+    runTest();
+  }
+  @Test
+  public void testListVertxGenReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testSetStringReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testSetLongReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testSetJsonObjectReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testSetComplexJsonObjectReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testSetJsonArrayReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testSetComplexJsonArrayReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testSetVertxGenReturn() throws Exception {
+    runTest();
+  }
+   @Test
+  public void testThrowableReturn() throws Exception {
+    runTest();
+  }
+
+  @Test
+  public void testCustomModule() throws Exception {
+    runTest();
+  }
+   
+  /*
+   *@Test
+   *public void testMethodWithListParams() throws Exception {
+   *  runTest();
+   *}
+   *@Test
+   *public void testMethodWithSetParams() throws Exception {
+   *  runTest();
+   *}
+   *@Test
+   *public void testMethodWithMapParams() throws Exception {
+   *  runTest();
+   *}
+   */
+
  /*  @Test
  *  public void testEnumReturn() throws Exception {
  *    runTest();
  *  }
- *
-  *  @Test
+ */
+  /*  @Test
   * public void testEnumParam() throws Exception {
-  *   runTest();
-  * }
-  *
-  *  @Test
-  * public void testMethodWithListParams() throws Exception {
-  *   runTest();
-  * }
-  *  @Test
-  * public void testMethodWithSetParams() throws Exception {
-  *   runTest();
-  * }
-  *  @Test
-  * public void testMethodWithMapParams() throws Exception {
   *   runTest();
   * }
   */

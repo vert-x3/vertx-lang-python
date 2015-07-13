@@ -51,7 +51,7 @@
 				out += ", ";
 			}
 			argName = convertName(param.name);
-			out += convParam(overloaded, argName, param.type);
+			out += convParam(argName, param.type);
 		}
 		out += ")";
 		return out;	
@@ -90,13 +90,9 @@
 		} else if (kind == CLASS_DATA_OBJECT) {
 			return "util.data_object_to_json(" + expr + ", hashable=" + boolToStr(hashable) + ")";
 		} else if (kind == CLASS_MAP) {
-			/*
-			*var keyType = type.args[0];
-			*var valueType = type.args[1];
-			*return "{" + convReturn(keyType, "k", hashable) + " : " + 
-            *       convReturn(valueType, "v", hashable) + " for k,v in " + expr + ".items()}";
-			*/
-			return expr;
+			var valueType = type.args[1];
+			return "util.java_map_to_python(" + expr + ", lambda x:" + 
+                    convReturn(valueType, "x", hashable) + ", lambda y:" + convParam("y", valueType) + ")";
 		} else if (kind == CLASS_API) {
 			if (type.raw != null) {
 				if (type.raw.simpleName.equals("Throwable")) {
@@ -146,7 +142,7 @@
 		}
 	}
 
-	def convParam(overloaded, argName, type) {
+	def convParam(argName, type) {
 		var paramName = argName;
 		var kind = type.kind;
 		var typeName = type.name;
@@ -179,17 +175,24 @@
 				return "util.convert_float_to_java(" + convertName(paramName) + ")";
 			} else if (typeName == 'double' || typeName == 'java.lang.Double') {
 				return "util.convert_double_to_java(" + convertName(paramName) + ")";
+			} else if (typeName == 'boolean' || typeName == 'java.lang.Boolean') {
+				return "util.convert_boolean_to_java(" + convertName(paramName) + ")";
 			} else {
 				return convertName(paramName);
 			}
         } else if (kind == CLASS_LIST) {
 			var element = type.args[0];
-			return "[" + convParam(overloaded, "i", element)  +" for i in " + paramName + "]"
+			return "util.python_list_to_java([" + convParam("i", element)  +" for i in " + paramName + "])"
         } else if (kind == CLASS_SET) {
 			var element = type.args[0];
-			return "set([" + convParam(overloaded, "i", element)  +" for i in " + paramName + "])"
+			return "util.python_set_to_java(set([" + convParam("i", element)  +" for i in " + paramName + "]))"
 		} else if (kind == CLASS_OBJECT) {
 			return "util.python_to_java(" + paramName + ")";
+		} else if (kind == CLASS_MAP) {
+		    var keyType = type.args[0];
+            var valueType = type.args[1];
+			return "util.python_map_to_java({" + convParam("k", keyType) + ":" + convParam("v", valueType) +
+                    " for k,v in  iteritems(" + paramName + ")})";
 		} else if (kind.basic || typeName.equals("java.lang.Void")) {
 			return paramName;
 		} else {
@@ -259,7 +262,7 @@
 @comment{"========================"}
 
 @declare{'genMethod'}
-	@code{methodList = methodsByName.get(methodName); overloaded = methodList.size() > 1; method = methodList.get(0);}
+	@code{methodList = methodsByName.get(methodName);  method = methodList.get(0);}
 
 
 	@code{requiredParams = []; optionalParams = []; optionsParam = null; paramNames = []; cnt = 0;}
@@ -423,7 +426,7 @@
 
 @code{handlers = []}
 @declare{'genHandlers'}
-	@code{methodList = methodsByName.get(methodName); overloaded = methodList.size() > 1; method = methodList.get(0);}
+	@code{methodList = methodsByName.get(methodName);  method = methodList.get(0);}
 	@foreach{method: methodList}
 		@foreach{param: method.params}
 			@if{param.type.kind == CLASS_HANDLER && !handlers.contains(param.type.name)}
@@ -492,7 +495,7 @@
 
 from __future__ import unicode_literals, print_function, absolute_import\n
 from vertx_python import util\n
-from vertx_python.compat import long, basestring\n
+from vertx_python.compat import long, basestring, iteritems\n
 \n
 
 @comment{"Initalize the Vert.x client if necessary"}
