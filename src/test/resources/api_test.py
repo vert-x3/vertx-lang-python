@@ -1644,21 +1644,30 @@ class TestAPI(unittest.TestCase):
                                                      None, None, None, None))
 
 
-    #def testEnumReturn(self):
-        #ret = obj.method_with_enum_return('JULIEN')
-        #self.assertEqual(:JULIEN, ret)
+    def testEnumReturn(self):
+        ret = obj.method_with_enum_return('JULIEN')
+        self.assertEqual('JULIEN', ret)
 
 
-    #def testEnumParam(self):
-        #ret = obj.method_with_enum_param('sausages', :TIM)
-        #self.assertEqual(ret, 'sausagesTIM')
+    def testEnumParam(self):
+        ret = obj.method_with_enum_param('sausages', "TIM")
+        self.assertEqual(ret, 'sausagesTIM')
 
 
 if __name__ == "__main__":
     meth = sys.argv[-1]
+    err = False
     print("Testing {}".format(meth))
     with util.handle_java_error():
-        case = TestAPI(meth)
-        case.debug()
+        if meth == "testEverything":
+            out = unittest.main(exit=False, argv=[sys.argv[0]])
+            result = out.result
+            if result.failures or result.errors:
+                err = True
+        else:
+            case = TestAPI(meth)
+            case.debug()
         util.vertx_shutdown()
+        if err:
+            sys.exit(1)
 

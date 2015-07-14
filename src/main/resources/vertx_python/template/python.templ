@@ -103,6 +103,9 @@
 			} else {
 				return "util.java_to_python(" + expr ")";
 			}
+		} else if (kind == CLASS_ENUM) {
+			System.out.println("HEY HEY HEY HEY " +type.name);
+			return expr + ".toString()";
 		} else if (kind.basic) {
 			var typeName = type.name;
 			if (typeName == 'char' || typeName == 'java.lang.Character') {
@@ -193,6 +196,8 @@
             var valueType = type.args[1];
 			return "util.python_map_to_java({" + convParam("k", keyType) + ":" + convParam("v", valueType) +
                     " for k,v in  iteritems(" + paramName + ")})";
+		} else if (kind == CLASS_ENUM) {
+			return "util.jvm." + type.name + ".valueOf(" + paramName + ")";
 		} else if (kind.basic || typeName.equals("java.lang.Void")) {
 			return paramName;
 		} else {
