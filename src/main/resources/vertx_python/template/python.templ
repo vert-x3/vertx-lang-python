@@ -104,7 +104,6 @@
 				return "util.java_to_python(" + expr ")";
 			}
 		} else if (kind == CLASS_ENUM) {
-			System.out.println("HEY HEY HEY HEY " +type.name);
 			return expr + ".toString()";
 		} else if (kind.basic) {
 			var typeName = type.name;
