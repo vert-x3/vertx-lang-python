@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from py4j.java_gateway import is_instance_of
 from py4j.java_collections import MapConverter, ListConverter, SetConverter, JavaMap
 
-from .compat import iteritems, reduce
+from .compat import reduce, iteritems
 
 java_gateway = None
 jvm = None
