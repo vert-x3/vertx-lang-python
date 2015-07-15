@@ -7,7 +7,9 @@ if sys.version_info[0] < 3:
     long = long
     basestring = basestring
     unicode = unicode
+    reduce = reduce
 else:
     long = int
     basestring = str
     unicode = str
+    from functools import reduce
