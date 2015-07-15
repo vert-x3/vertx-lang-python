@@ -32,29 +32,43 @@ class AdaptingMap(JavaMap):
         """ Convert to a normal python dict. """
         return {k: self.java_converter(v) for k,v in iteritems(self)}
 
+
 class FrozenEncoder(json.JSONEncoder):
+    ''' JSON encode capable of handling sets and frozen sets. '''
     def default(self, obj):
         if isinstance(obj, (set, frozenset)):
             return list(obj)
         return json.JSONEncoder(self, obj)
 
-class frozendict(dict, collections.Mapping):
+def parse_array(old_parse_array, *args, **kwargs):
+    values, end = old_parse_array(*args, **kwargs)
+    return frozenset(values), end
+
+
+class FrozenDecoder(json.JSONDecoder):
+    ''' Decoder that will use frozensets insteadof lists for JSON arrays. '''
     def __init__(self, *args, **kwargs):
-        #self.__dict = dict(*args, **kwargs)
+        super(FrozenDecoder, self).__init__(*args, **kwargs)
+        old_parse_array = self.parse_array
+        self.parse_array = partial(parse_array, old_parse_array)
+        self.scan_once = json.scanner.py_make_scanner(self)
+
+
+
+
+class frozendict(dict, collections.Mapping):
+    ''' Hashable dict.
+    
+    This isn't truly frozen (immutable), but it can be placed
+    into a set.
+    
+    '''
+    def __init__(self, *args, **kwargs):
         self.__hash = None
         self.update(*args, **kwargs)
 
-    #def __getitem__(self, key):
-        #return self.__dict[key]
-
     def copy(self, **add_or_replace):
         return frozendict(self, **add_or_replace)
-
-    #def __iter__(self):
-        #return iter(self.__dict)
-
-    #def __len__(self):
-        #return len(self.__dict)
 
     def __repr__(self):
         return '<frozendict %s>' % repr(self.__dict)
@@ -64,20 +78,9 @@ class frozendict(dict, collections.Mapping):
             self.__hash = reduce(operator.xor, map(hash, self.iteritems()), 0)
         return self.__hash
 
-def parse_array(old_parse_array, *args, **kwargs):
-    values, end = old_parse_array(*args, **kwargs)
-    return frozenset(values), end
-
-class FrozenDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        super(FrozenDecoder, self).__init__(*args, **kwargs)
-        old_parse_array = self.parse_array
-        self.parse_array = partial(parse_array, old_parse_array)
-        self.scan_once = json.scanner.py_make_scanner(self)
-
 
 @contextmanager
-def handle_java_error():
+def handle_vertx_shutdown(on_error_only=False):
     """ Protect calls to the Java Gateway.
     
     This decorate ensures the properly cleanup is done if a call
@@ -87,13 +90,26 @@ def handle_java_error():
     the interpreter from exiting.
     
     """
+    shutdown_called = False
     try:
         yield
     except Exception:
         vertx_shutdown()
+        shutdown_called = True
         raise
+    finally:
+        if not on_error_only and not shutdown_called:
+            vertx_shutdown()
 
 def vertx_shutdown():
+    ''' Shut down py4j.
+    
+    This has to be called prior to exiting after calling vertx_init(),
+    or the program will likely hang forever. This is because py4j starts
+    a callback server in a non-daemon background thread, which will keep
+    the program from exiting when the main thread completes.
+    
+    '''
     global java_gateway
     global jvm
     global jvertx
@@ -153,7 +169,12 @@ def convert_boolean_to_java(x):
     return bool(x)
 
 def json_to_python(obj, hashable=False):
-    """Converts a Java JSON object to Python dict or list"""
+    """ Converts a Java JSON object to Python dict or list. 
+    
+    hashable kwarg indicates if the returns dict needs to be
+    hashable (and therefore able to be put into a set).
+    
+    """
     object_hook = frozendict if hashable else dict
     cls = FrozenDecoder if hashable else json.JSONDecoder
     d = json.loads(obj.encode(), object_hook=object_hook, cls=cls) if obj is not None else None
@@ -179,8 +200,10 @@ def python_to_java(obj):
 
 def python_map_to_java(obj):
     return MapConverter().convert(obj, java_gateway._gateway_client)
+
 def python_set_to_java(obj):
     return SetConverter().convert(obj, java_gateway._gateway_client)
+
 def python_list_to_java(obj):
     return ListConverter().convert(obj, java_gateway._gateway_client)
 
@@ -193,6 +216,14 @@ def handle_none(obj, type_):
     return type_(obj) if obj is not None else obj
 
 def java_map_to_python(obj, java_converter, python_converter):
+    ''' Returns a dict-like object that also updates the corresponding java map. 
+    
+    Returns an object that inherits from the py4j.java_collection.JavaMap, 
+    but also supports converting Python objects inserted into the correct 
+    java object, as well as supporting converting Java objects retrieved 
+    from the map into the correct python object.
+    
+    '''
     if obj is None:
         return None
     return AdaptingMap(obj, java_converter, python_converter)
@@ -212,6 +243,7 @@ def java_to_python(obj, hashable=False):
 
 
 def cached(func):
+    ''' Decorator for methods that need to cache results. '''
     dct = dict(cached_ret=None)
     @wraps(func)
     def inner(*args, **kwargs):

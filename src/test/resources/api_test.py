@@ -21,7 +21,7 @@ from py4j.protocol import Py4JJavaError
 
 util.vertx_init()
 
-with util.handle_java_error():
+with util.handle_vertx_shutdown(on_error_only=True):
     jvm = util.jvm
     obj = TestInterface(jvm.io.vertx.codegen.testmodel.TestInterfaceImpl())
     refed_obj = RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl())
@@ -1658,7 +1658,7 @@ if __name__ == "__main__":
     meth = sys.argv[-1]
     err = False
     print("Testing {}".format(meth))
-    with util.handle_java_error():
+    with util.handle_vertx_shutdown():
         if meth == "testEverything":
             out = unittest.main(exit=False, argv=[sys.argv[0]])
             result = out.result
@@ -1667,7 +1667,6 @@ if __name__ == "__main__":
         else:
             case = TestAPI(meth)
             case.debug()
-        util.vertx_shutdown()
-        if err:
-            sys.exit(1)
+    if err:
+        sys.exit(1)
 
