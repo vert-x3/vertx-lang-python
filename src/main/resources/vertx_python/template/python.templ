@@ -458,7 +458,7 @@
 						                self.handler(@{convReturn(param.type.args[0].args[0], "result.result()", false)}, None)\n
 								@end{}
 						            else:\n
-						                self.handler(None, result.cause())\n
+						                self.handler(None, util.VertxException(result.cause().getMessage()))\n
 							@else{}
 								@if{param.type.args[0].name.startsWith('java.lang.Void')}
 						            self.handler(None)\n

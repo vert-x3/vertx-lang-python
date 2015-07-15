@@ -144,7 +144,7 @@ class TestAPI(unittest.TestCase):
         def handler(x, err):
             self.assertIsNone(x);
             self.assertIsNotNone(err);
-            self.assertEqual("foobar!", err.getMessage());
+            self.assertEqual("foobar!", str(err));
             dct['count'] += 1
 
         obj.method_with_handler_async_result_byte(True, handler)
@@ -215,7 +215,7 @@ class TestAPI(unittest.TestCase):
         def handler(option, err):
             self.assertIsNone(option)
             self.assertIsNotNone(err)
-            self.assertEqual("foobar!", err.getMessage())
+            self.assertEqual("foobar!", str(err))
             dct['count'] += 1
         obj.method_with_handler_async_result_data_object(True, handler)
         self.assertEqual(dct['count'], 1)
@@ -882,7 +882,7 @@ class TestAPI(unittest.TestCase):
         dct = dict(count=0)
         def handler(val, err):
             self.assertIsNone(val)
-            self.assertEqual(err.getMessage(), 'foo!')
+            self.assertEqual(str(err), 'foo!')
             dct['count'] += 1
         obj.method_with_handler_async_result_void(True, handler)
         self.assertEqual(dct['count'], 1)

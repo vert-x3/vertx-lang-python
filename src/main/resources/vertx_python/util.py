@@ -16,6 +16,9 @@ java_gateway = None
 jvm = None
 jvertx = None
 
+class VertxException(Exception):
+    pass
+
 class AdaptingMap(JavaMap):
     def __init__(self, map, java_converter, python_converter):
         JavaMap.__init__(self, map._target_id, map._gateway_client)
