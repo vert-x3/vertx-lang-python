@@ -9,3 +9,4 @@ src/main/resources/vertx_python/*/
 src/test/resources/testmodel_python/*.py
 src/test/resources/testmodel_python/
 src/test/resources/acme_python/
+target
