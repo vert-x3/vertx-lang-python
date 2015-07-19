@@ -46,7 +46,6 @@ def parse_array(old_parse_array, *args, **kwargs):
     values, end = old_parse_array(*args, **kwargs)
     return frozenset(values), end
 
-
 class FrozenDecoder(json.JSONDecoder):
     ''' Decoder that will use frozensets insteadof lists for JSON arrays. '''
     def __init__(self, *args, **kwargs):
@@ -54,8 +53,6 @@ class FrozenDecoder(json.JSONDecoder):
         old_parse_array = self.parse_array
         self.parse_array = partial(parse_array, old_parse_array)
         self.scan_once = json.scanner.py_make_scanner(self)
-
-
 
 
 class frozendict(dict, collections.Mapping):
@@ -73,7 +70,7 @@ class frozendict(dict, collections.Mapping):
         return frozendict(self, **add_or_replace)
 
     def __repr__(self):
-        return '<frozendict %s>' % repr(self.__dict)
+        return '<frozendict %s>' % repr(super(frozendict, self).__repr__())
 
     def __hash__(self):
         if self.__hash is None:
