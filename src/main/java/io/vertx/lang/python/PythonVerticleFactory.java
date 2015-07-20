@@ -33,7 +33,7 @@ public class PythonVerticleFactory implements VerticleFactory {
 
   @Override
   public String prefix() {
-    return "python";
+    return "py";
   }
 
   @Override
