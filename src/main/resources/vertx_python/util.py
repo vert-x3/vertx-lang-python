@@ -198,13 +198,13 @@ def python_to_java(obj):
     return obj
 
 def python_map_to_java(obj):
-    return MapConverter().convert(obj, java_gateway._gateway_client)
+    return MapConverter().convert(obj, java_gateway._gateway_client) if obj else obj
 
 def python_set_to_java(obj):
-    return SetConverter().convert(obj, java_gateway._gateway_client)
+    return SetConverter().convert(obj, java_gateway._gateway_client) if obj else obj
 
 def python_list_to_java(obj):
-    return ListConverter().convert(obj, java_gateway._gateway_client)
+    return ListConverter().convert(obj, java_gateway._gateway_client) if obj else obj
 
 def data_object_to_json(obj, hashable=False):
     if obj is None:

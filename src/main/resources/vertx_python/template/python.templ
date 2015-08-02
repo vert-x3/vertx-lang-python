@@ -184,17 +184,61 @@
 			}
         } else if (kind == CLASS_LIST) {
 			var element = type.args[0];
-			return "util.python_list_to_java([" + convParam("i", element)  +" for i in " + paramName + "])"
+			var elementName = element.name;
+			if (elementName == 'byte' || elementName == 'java.lang.Byte') {
+				return "util.jvm.io.vertx.lang.python.TypeHelper.toByteList(" +
+					   "util.python_list_to_java([" + convParam("i", element) +
+                       " for i in " + paramName + "] if " + paramName + 
+                       " is not None else None))";
+			} else if (elementName == 'short' || elementName == 'java.lang.Short') {
+				return "util.jvm.io.vertx.lang.python.TypeHelper.toShortList(" + 
+                       "util.python_list_to_java([" + convParam("i", element) +
+					    " for i in " + paramName + "] if " + paramName + 
+                        " is not None else None))";
+			} else {
+				return "util.python_list_to_java([" + convParam("i", element)  +
+					   " for i in " + paramName + "] if " + paramName + 
+                       " is not None else None)";
+			}
         } else if (kind == CLASS_SET) {
 			var element = type.args[0];
-			return "util.python_set_to_java(set([" + convParam("i", element)  +" for i in " + paramName + "]))"
+			var elementName = element.name;
+			if (elementName == 'byte' || elementName == 'java.lang.Byte') {
+				return "util.jvm.io.vertx.lang.python.TypeHelper.toByteSet(" +
+					   "util.python_set_to_java([" + convParam("i", element) +
+                       " for i in " + paramName + "] if " + paramName + 
+                       " is not None else None))";
+			} else if (elementName == 'short' || elementName == 'java.lang.Short') {
+				return "util.jvm.io.vertx.lang.python.TypeHelper.toShortSet(" + 
+                       "util.python_set_to_java([" + convParam("i", element) +
+					    " for i in " + paramName + "] if " + paramName + 
+                        " is not None else None))";
+			} else {
+				return "util.python_set_to_java([" + convParam("i", element)  +
+					   " for i in " + paramName + "] if " + paramName + 
+                       " is not None else None)";
+			}
 		} else if (kind == CLASS_OBJECT) {
 			return "util.python_to_java(" + paramName + ")";
 		} else if (kind == CLASS_MAP) {
 		    var keyType = type.args[0];
             var valueType = type.args[1];
-			return "util.python_map_to_java({" + convParam("k", keyType) + ":" + convParam("v", valueType) +
-                    " for k,v in  iteritems(" + paramName + ")})";
+			var elementName = valueType.name;
+			if (elementName == 'byte' || elementName == 'java.lang.Byte') {
+				return "util.jvm.io.vertx.lang.python.TypeHelper.toByteMap(" + 
+                       "util.python_map_to_java({" + convParam("k", keyType) + 
+					   ":" + convParam("v", valueType) + 
+                       " for k,v in iteritems(" + paramName + ")}))";
+			} else if (elementName == 'short' || elementName == 'java.lang.Short') {
+				return "util.jvm.io.vertx.lang.python.TypeHelper.toShortMap(" + 
+                       "util.python_map_to_java({" + convParam("k", keyType) + 
+					   ":" + convParam("v", valueType) + 
+                       " for k,v in iteritems(" + paramName + ")}))";
+			} else {
+				return "util.python_map_to_java({" + convParam("k", keyType) + 
+					   ":" + convParam("v", valueType) + 
+                       " for k,v in iteritems(" + paramName + ")})";
+			}
 		} else if (kind == CLASS_ENUM) {
 			return "util.jvm." + type.name + ".valueOf(" + paramName + ")";
 		} else if (kind.basic || typeName.equals("java.lang.Void")) {
