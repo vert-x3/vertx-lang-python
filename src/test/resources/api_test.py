@@ -1601,7 +1601,8 @@ class TestAPI(unittest.TestCase):
             [['foo'], ['blah']],
             [RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('foo'), 
              RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('bar')],
-            [{'foo':'String 1','bar':1,'wibble':1.1}, {'foo':'String 2','bar':2,'wibble':2.2}]
+            [{'foo':'String 1','bar':1,'wibble':1.1}, {'foo':'String 2','bar':2,'wibble':2.2}],
+            ['JULIEN', 'TIM']
         )
 
     def testMethodWithSetParams(self):
@@ -1616,7 +1617,8 @@ class TestAPI(unittest.TestCase):
             set([RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('foo'), 
              RefedInterface1(jvm.io.vertx.codegen.testmodel.RefedInterface1Impl()).set_string('bar')]),
             set([frozendict({'foo':'String 1','bar':1,'wibble':1.1}), 
-                 frozendict({'foo':'String 2','bar':2,'wibble':2.2})])
+                 frozendict({'foo':'String 2','bar':2,'wibble':2.2})]),
+            set(['TIM', 'JULIEN'])
         )
 
     def testMethodWithMapParams(self):
