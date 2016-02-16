@@ -7,9 +7,14 @@
       "templateFileName": "vertx_python/template/python.templ"
     },
     {
-      "kind": "class",
-      "fileName": "'resources/' + type.raw.moduleName + '_python/' + fqn.substring(fqn.lastIndexOf('.', fqn.lastIndexOf('.') - 1) + 1, fqn.lastIndexOf('.')) + '/__init__.py'",
+      "kind": "module",
+      "fileName": "'resources/' + name + '_python/__init__.py'",
       "templateFileName": "vertx_python/template/init.templ"
+    },
+    {
+      "kind" : "package",
+      "fileName" : "'resources/' +  module.name + '_python/' + fqn.substring(fqn.lastIndexOf('.') + 1, fqn.length()) + '/__init__.py'",
+      "templateFileName": "vertx_python/template/init2.templ"
     }
   ]
 }
