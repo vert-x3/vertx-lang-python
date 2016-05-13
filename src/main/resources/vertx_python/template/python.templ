@@ -3,9 +3,10 @@
 
 @code{
 	def requiresTypeCheck(methods) {
+		requiresCheck = [CLASS_PRIMITIVE, CLASS_BOXED_PRIMITIVE, CLASS_STRING, CLASS_JSON_ARRAY, CLASS_JSON_OBJECT, CLASS_HANDLER, CLASS_DATA_OBJECT];
 		for (method : methods) {
 			for (param : method.params) {
-				if ([CLASS_PRIMITIVE, CLASS_BOXED_PRIMITIVE, CLASS_STRING, CLASS_JSON_ARRAY, CLASS_JSON_OBJECT, CLASS_HANDLER, CLASS_DATA_OBJECT].contains(param.type.kind)) {
+				if (requiresCheck.contains(param.type.kind)) {
 					return true;
 				}
 			}
@@ -405,19 +406,17 @@
 			@{ind}    """"""\n
 		@end{}
 
+		@comment{"Import the Python return type inside of the method if its not "}
+		@comment{"already imported. Needed to avoid circular imports."}
+		@if{baseMethod.returnType.kind == CLASS_API && 
+           !imported.contains(baseMethod.returnType.raw.simpleName) && 
+           baseMethod.returnType.raw.simpleName != ifaceSimpleName}
+			@code{refedPackage = baseMethod.returnType.raw.packageName}
+			@code{lastPackage = refedPackage.substring(refedPackage.lastIndexOf('.') + 1)}
+			@code{refedType = baseMethod.returnType.raw.simpleName}
+			@{ind}    from vertx_python.@{lastPackage}.@{convertName(refedType)} import @{refedType}\n
+		@end{}
 		@if{childMethods.isEmpty()}
-			@comment{"Import the Python return type inside of the method if its not "}
-			@comment{"already imported. Needed to avoid circular imports."}
-			@if{baseMethod.returnType.kind == CLASS_API && 
-               !imported.contains(baseMethod.returnType.raw.simpleName) && 
-               baseMethod.returnType.raw.simpleName != ifaceSimpleName}
-				@code{retType = baseMethod.returnType}
-				@code{refedType = retType.raw.name}
-				@code{refedPackage = refedType.substring(refedType.lastIndexOf('.', refedType.lastIndexOf('.') - 1) + 1, 
-                                                         refedType.lastIndexOf('.'))}
-				@{ind}    from @{retType.moduleName}_python.@{refedPackage}.@{convertName(retType.simpleName)} import @{retType.simpleName}\n
-				@code{imported.add(retType.simpleName)}
-			@end{}
 			@if{requiresTypeCheck([baseMethod])}
 				@{ind}    if @includeNamed{'genCondition';method=baseMethod;}:\n
 				@if{baseMethod.fluent}
@@ -553,11 +552,12 @@ util.vertx_init()\n
 
 
 @code{imported = []}
-@foreach{referencedType : referencedTypes}
+@foreach{referencedType : superTypes}
 	@if{!imported.contains(referencedType.simpleName)}
-		@code{refedType = referencedType.raw.name}
-		@code{refedPackage = refedType.substring(refedType.lastIndexOf('.', refedType.lastIndexOf('.') - 1) + 1, refedType.lastIndexOf('.'))}
-		from @{referencedType.moduleName}_python.@{refedPackage}.@{convertName(referencedType.simpleName)} import @{referencedType.simpleName}\n
+		@code{refedPackage = referencedType.raw.packageName}
+		@code{lastPackage = refedPackage.substring(refedPackage.lastIndexOf('.') + 1)}
+		@code{refedType = referencedType.raw.simpleName}
+		from vertx_python.@{lastPackage}.@{convertName(refedType)} import @{refedType}\n
 		@code{imported.add(referencedType.simpleName)}
 	@end{}
 @end{}
